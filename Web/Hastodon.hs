@@ -1,6 +1,8 @@
 module Web.Hastodon
   (
     mkHastodonClient
+
+  , getAccountsById
   , getHomeTimeline
   , getPublicTimeline
   ) where
@@ -11,6 +13,7 @@ import Network.HTTP.Simple
 import Network.HTTP.Types.Header
 
 -- Mastodon API endpoints
+uAccountsById = "/api/v1/accounts/" -- :id
 uHomeTimeline = "/api/v1/timelines/home"
 uPublicTimeline = "/api/v1/timelines/public"
 
@@ -36,6 +39,8 @@ getHastodonResponseBody url client = do
 mkHastodonClient :: String -> String -> HastodonClient
 mkHastodonClient host token = HastodonClient host token
 
+getAccountsById :: String -> HastodonClient -> IO String
+getAccountsById id = getHastodonResponseBody $ uAccountsById ++ id
 
 getHomeTimeline :: HastodonClient -> IO String
 getHomeTimeline = getHastodonResponseBody uHomeTimeline
