@@ -1,3 +1,10 @@
+module Web.Hastodon
+  (
+    mkHastodonClient
+  , getHomeTimeline
+  , getPublicTimeline
+  ) where
+
 import Data.ByteString.Char8 as Char8
 import Data.ByteString.Lazy.Char8 as LChar8
 import Network.HTTP.Simple
@@ -26,20 +33,13 @@ getHastodonResponseBody url client = do
 -- exported functions
 -- 
 
+mkHastodonClient :: String -> String -> HastodonClient
+mkHastodonClient host token = HastodonClient host token
+
+
 getHomeTimeline :: HastodonClient -> IO String
 getHomeTimeline = getHastodonResponseBody uHomeTimeline
 
 getPublicTimeline :: HastodonClient -> IO String
 getPublicTimeline = getHastodonResponseBody uPublicTimeline
-
--- 
--- TODO remove main()
--- 
-main :: IO ()
-main = do
-  let token = "???"
-  let client = HastodonClient "pawoo.net" token
-  -- tl <- getHomeTimeline client
-  tl <- getPublicTimeline client
-  print tl
 

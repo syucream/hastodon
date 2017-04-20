@@ -1,0 +1,23 @@
+Name: Hastodon
+Version: 0.0.1
+Synopsis: mastodon client module for Haskell
+Category: Web
+Description: mastodon client module for Haskell
+Author: Ryo Okubo
+Maintainer: syucream1031@gmail.com
+Homepage: https://github.com/syucream/hastodon
+
+License: MIT
+license-file: LICENSE
+Stability: experimental
+build-type: Simple
+
+Source-repository head
+  type: git
+  location: https://github.com/syucream/hastodon.git
+
+Library
+  default-language: Haskell2010
+  Build-Depends: base, bytestring, http-types, http-conduit
+  Exposed-Modules: Web.Hastodon
+  Other-Modules:
