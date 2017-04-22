@@ -22,7 +22,7 @@ main = do
 ## Status of implementations
 
 - [x]  GET /api/v1/accounts/:id
-- [ ]  GET /api/v1/accounts/verify_credentials
+- [x]  GET /api/v1/accounts/verify_credentials
 - [ ]  PATCH /api/v1/accounts/update_credentials
 - [ ]  GET /api/v1/accounts/:id/followers
 - [ ]  GET /api/v1/accounts/:id/following
@@ -33,7 +33,7 @@ main = do
 - [ ]  GET /api/v1/accounts/:id/unblock
 - [ ]  GET /api/v1/accounts/:id/mute
 - [ ]  GET /api/v1/accounts/:id/unmute
-- [ ]  GET /api/v1/accounts/relationships
+- [x]  GET /api/v1/accounts/relationships
 - [ ]  GET /api/v1/accounts/search
 - [ ]  POST /api/v1/apps
 - [ ]  GET /api/v1/blocks
