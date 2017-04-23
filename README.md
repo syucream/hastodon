@@ -26,16 +26,16 @@ main = do
 - [ ]  PATCH /api/v1/accounts/update_credentials
 - [x]  GET /api/v1/accounts/:id/followers
 - [x]  GET /api/v1/accounts/:id/following
-- [ ]  GET /api/v1/accounts/:id/statuses
-- [ ]  POST /api/v1/accounts/:id/follow
-- [ ]  POST /api/v1/accounts/:id/unfollow
-- [ ]  POST /api/v1/accounts/:id/block
-- [ ]  POST /api/v1/accounts/:id/unblock
-- [ ]  POST /api/v1/accounts/:id/mute
-- [ ]  POST /api/v1/accounts/:id/unmute
+- [x]  GET /api/v1/accounts/:id/statuses
+- [x]  POST /api/v1/accounts/:id/follow
+- [x]  POST /api/v1/accounts/:id/unfollow
+- [x]  POST /api/v1/accounts/:id/block
+- [x]  POST /api/v1/accounts/:id/unblock
+- [x]  POST /api/v1/accounts/:id/mute
+- [x]  POST /api/v1/accounts/:id/unmute
 - [x]  GET /api/v1/accounts/relationships
-- [ ]  GET /api/v1/accounts/search
-- [ ]  POST /api/v1/apps
+- [x]  GET /api/v1/accounts/search
+- [x]  POST /api/v1/apps
 - [x]  GET /api/v1/blocks
 - [ ]  GET /api/v1/favourites
 - [ ]  GET /api/v1/follow_requests

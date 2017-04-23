@@ -1,5 +1,3 @@
-{-# LANGUAGE DeriveGeneric #-}
-
 module Web.Hastodon
   (
     mkHastodonClient
@@ -8,7 +6,16 @@ module Web.Hastodon
   , getCurrentAccount
   , getFollowers
   , getFollowing
+  , getAccountStatuses
+  , postFollow
+  , postUnfollow
+  , postBlock
+  , postUnblock
+  , postMute
+  , postUnmute
   , getRelationships
+  , getSearchedAccounts
+  , postApps
   , getBlocks
   , getMutes
   , getRebloggedBy
@@ -39,7 +46,16 @@ pAccountById     = "/api/v1/accounts/:id"
 pCurrentAccounts = "/api/v1/accounts/verify_credentials"
 pFollowers       = "/api/v1/accounts/:id/followers"
 pFollowing       = "/api/v1/accounts/:id/following"
+pAccountStatuses = "/api/v1/accounts/:id/statuses"
+pFollow          = "/api/v1/accounts/:id/follow"
+pUnfollow        = "/api/v1/accounts/:id/unfollow"
+pBlock           = "/api/v1/accounts/:id/block"
+pUnblock         = "/api/v1/accounts/:id/unblock"
+pMute            = "/api/v1/accounts/:id/mute"
+pUnmute          = "/api/v1/accounts/:id/unmute"
 pRelationships   = "/api/v1/accounts/relationships"
+pSearch          = "/api/v1/accounts/search"
+pApps            = "/api/v1/apps"
 pBlocks          = "/api/v1/blocks"
 pMutes           = "/api/v1/mutes"
 pRebloggedBy     = "/api/v1/statuses/:id/reblogged_by"
@@ -102,6 +118,19 @@ instance FromJSON Application where
   parseJSON (Object v) =
     Application <$> (v .:  T.pack "name")
                 <*> (v .:? T.pack "website")
+
+data OAuthClient = OAuthClient {
+  oauthClientId :: Int,
+  oauthClientRedirectUri :: String,
+  oauthClientClientId :: String,
+  oauthClientClientSecret :: String
+} deriving (Show)
+instance FromJSON OAuthClient where
+  parseJSON (Object v) =
+    OAuthClient <$> (v .: T.pack "id")
+                <*> (v .: T.pack "redirect_uri")
+                <*> (v .: T.pack "client_id")
+                <*> (v .: T.pack "client_secret")
 
 data Attachment = Attachment {
   attachmentId :: Int,
@@ -268,12 +297,60 @@ getFollowing id client = do
   res <- getHastodonResponseJSON (replace ":id" (show id) pFollowing) client
   return (getResponseBody res :: [Account])
 
+getAccountStatuses :: Int -> HastodonClient -> IO [Status]
+getAccountStatuses id client = do
+  res <- getHastodonResponseJSON (replace ":id" (show id) pAccountStatuses) client
+  return (getResponseBody res :: [Status])
+
 getRelationships :: [Int] -> HastodonClient -> IO [Relationship]
 getRelationships ids client = do
   let intIds = map (show) ids
   let params = foldl (\x y -> x ++ (if x == "" then "?" else "&") ++ "id%5b%5d=" ++ y) "" intIds
   res <- getHastodonResponseJSON (pRelationships ++ params) client
   return (getResponseBody res :: [Relationship])
+
+getSearchedAccounts :: String -> HastodonClient -> IO [Account]
+getSearchedAccounts query client = do
+  res <- getHastodonResponseJSON (pSearch ++ "?q=" ++ query) client
+  return (getResponseBody res :: [Account])
+
+postFollow :: Int -> HastodonClient -> IO Relationship
+postFollow id client = do
+  res <- postAndGetHastodonResponseJSON (replace ":id" (show id) pFollow) [] client
+  return (getResponseBody res :: Relationship)
+
+postUnfollow :: Int -> HastodonClient -> IO Relationship
+postUnfollow id client = do
+  res <- postAndGetHastodonResponseJSON (replace ":id" (show id) pUnfollow) [] client
+  return (getResponseBody res :: Relationship)
+
+postBlock :: Int -> HastodonClient -> IO Relationship
+postBlock id client = do
+  res <- postAndGetHastodonResponseJSON (replace ":id" (show id) pBlock) [] client
+  return (getResponseBody res :: Relationship)
+
+postUnblock :: Int -> HastodonClient -> IO Relationship
+postUnblock id client = do
+  res <- postAndGetHastodonResponseJSON (replace ":id" (show id) pUnblock) [] client
+  return (getResponseBody res :: Relationship)
+
+postMute :: Int -> HastodonClient -> IO Relationship
+postMute id client = do
+  res <- postAndGetHastodonResponseJSON (replace ":id" (show id) pMute) [] client
+  return (getResponseBody res :: Relationship)
+
+postUnmute :: Int -> HastodonClient -> IO Relationship
+postUnmute id client = do
+  res <- postAndGetHastodonResponseJSON (replace ":id" (show id) pUnmute) [] client
+  return (getResponseBody res :: Relationship)
+
+postApps :: String -> HastodonClient -> IO OAuthClient
+postApps clientName client = do
+  let reqBody = [(Char8.pack "client_name", Char8.pack clientName),
+                 (Char8.pack "redirect_uris", Char8.pack "urn:ietf:wg:oauth:2.0:oob"),
+                 (Char8.pack "scopes", Char8.pack "read write follow")]
+  res <- postAndGetHastodonResponseJSON pApps reqBody client
+  return (getResponseBody res :: OAuthClient)
 
 getBlocks :: HastodonClient -> IO [Account]
 getBlocks client = do
