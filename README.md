@@ -15,11 +15,13 @@ main = do
   let client = mkHastodonClient "mastodon.social" token
   tl <- getPublicTimeline client
   print body
-  result <- postStatuses "test toot from hastodon!" client
+  result <- postStatus "test toot from hastodon!" client
   print result 
 ```
 
 ## Status of implementations
+
+### Mastodon APIs
 
 - [x]  GET /api/v1/accounts/:id
 - [x]  GET /api/v1/accounts/verify_credentials
@@ -66,10 +68,14 @@ main = do
 - [x]  GET /api/v1/timelines/public
 - [x]  GET /api/v1/timelines/tag/:hashtag
 
+### Auth
+
+- TBD
+
 ## License
 
 MIT
 
 ## Author
 
-Ryo Okubo
+Ryo Okubo <syucream1031@gmail.com>
