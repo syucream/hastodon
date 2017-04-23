@@ -9,7 +9,10 @@ module Web.Hastodon
   , getFollowers
   , getFollowing
   , getRelationships
+  , getBlocks
   , getMutes
+  , getRebloggedBy
+  , getFavoritedBy
   , postStatuses
   , getHomeTimeline
   , getPublicTimeline
@@ -32,7 +35,10 @@ pCurrentAccounts = "/api/v1/accounts/verify_credentials"
 pFollowers       = "/api/v1/accounts/:id/followers"
 pFollowing       = "/api/v1/accounts/:id/following"
 pRelationships   = "/api/v1/accounts/relationships"
+pBlocks          = "/api/v1/blocks"
 pMutes           = "/api/v1/mutes"
+pRebloggedBy     = "/api/v1/statuses/:id/reblogged_by"
+pFavoritedBy     = "/api/v1/statuses/:id/favourited_by"
 pStatuses        = "/api/v1/statuses"
 pHomeTimeline    = "/api/v1/timelines/home"
 pPublicTimeline  = "/api/v1/timelines/public"
@@ -77,6 +83,23 @@ instance FromJSON Account where
             <*> (v .: T.pack "header")
             <*> (v .: T.pack "header_static")
 
+data Attachment = Attachment {
+  attachmentId :: Int,
+  attachmentType :: String,
+  attachmentUrl :: String,
+  attachmentRemoteUrl :: String,
+  attachmentPreviewUrl :: String,
+  attachmentTextUrl :: String
+} deriving (Show)
+instance FromJSON Attachment where
+  parseJSON (Object v) =
+    Attachment <$> (v .: T.pack "id")
+               <*> (v .: T.pack "type")
+               <*> (v .: T.pack "url")
+               <*> (v .: T.pack "remote_url")
+               <*> (v .: T.pack "preview_url")
+               <*> (v .: T.pack "text_url")
+
 data Relationship = Relationship {
   relationshipId :: Int,
   relationshipFollowing :: Bool,
@@ -93,6 +116,28 @@ instance FromJSON Relationship where
                  <*> (v .: T.pack "blocking")
                  <*> (v .: T.pack "muting")
                  <*> (v .: T.pack "requested")
+
+data Mention = Mention {
+  mentionUrl :: String,
+  mentionUsername :: String,
+  mentionAcct :: String,
+  mentionId :: Int
+} deriving (Show)
+instance FromJSON Mention where
+  parseJSON (Object v) =
+    Mention <$> (v .: T.pack "url")
+            <*> (v .: T.pack "username")
+            <*> (v .: T.pack "acct")
+            <*> (v .: T.pack "id")
+
+data Tag = Tag {
+  name :: String,
+  url :: String
+} deriving (Show)
+instance FromJSON Tag where
+  parseJSON (Object v) =
+    Tag <$> (v .: T.pack "name")
+        <*> (v .: T.pack "url")
 
 -- TODO
 -- data Status = Status {
@@ -184,9 +229,24 @@ getRelationships ids client = do
   res <- getHastodonResponseJSON (pRelationships ++ params) client
   return (getResponseBody res :: [Relationship])
 
+getBlocks :: HastodonClient -> IO [Account]
+getBlocks client = do
+  res <- getHastodonResponseJSON pBlocks client
+  return (getResponseBody res :: [Account])
+
 getMutes :: HastodonClient -> IO [Account]
 getMutes client = do
   res <- getHastodonResponseJSON pMutes client
+  return (getResponseBody res :: [Account])
+
+getRebloggedBy :: Int -> HastodonClient -> IO [Account]
+getRebloggedBy id client = do
+  res <- getHastodonResponseJSON (replace ":id" (show id) pRebloggedBy) client
+  return (getResponseBody res :: [Account])
+
+getFavoritedBy :: Int -> HastodonClient -> IO [Account]
+getFavoritedBy id client = do
+  res <- getHastodonResponseJSON (replace ":id" (show id) pFavoritedBy) client
   return (getResponseBody res :: [Account])
 
 postStatuses :: String -> HastodonClient -> IO String

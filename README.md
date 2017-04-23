@@ -29,14 +29,14 @@ main = do
 - [ ]  GET /api/v1/accounts/:id/statuses
 - [ ]  POST /api/v1/accounts/:id/follow
 - [ ]  POST /api/v1/accounts/:id/unfollow
-- [ ]  GET /api/v1/accounts/:id/block
-- [ ]  GET /api/v1/accounts/:id/unblock
-- [ ]  GET /api/v1/accounts/:id/mute
-- [ ]  GET /api/v1/accounts/:id/unmute
+- [ ]  POST /api/v1/accounts/:id/block
+- [ ]  POST /api/v1/accounts/:id/unblock
+- [ ]  POST /api/v1/accounts/:id/mute
+- [ ]  POST /api/v1/accounts/:id/unmute
 - [x]  GET /api/v1/accounts/relationships
 - [ ]  GET /api/v1/accounts/search
 - [ ]  POST /api/v1/apps
-- [ ]  GET /api/v1/blocks
+- [x]  GET /api/v1/blocks
 - [ ]  GET /api/v1/favourites
 - [ ]  GET /api/v1/follow_requests
 - [ ]  POST /api/v1/follow_requests/:id/authorize
@@ -54,8 +54,8 @@ main = do
 - [ ]  GET /api/v1/statuses/:id
 - [ ]  GET /api/v1/statuses/:id/context
 - [ ]  GET /api/v1/statuses/:id/card
-- [ ]  GET /api/v1/statuses/:id/reblogged_by
-- [ ]  GET /api/v1/statuses/:id/favourited_by
+- [x]  GET /api/v1/statuses/:id/reblogged_by
+- [x]  GET /api/v1/statuses/:id/favourited_by
 - [x]  POST /api/v1/statuses
 - [ ]  DELETE /api/v1/statuses/:id
 - [ ]  POST /api/v1/statuses/:id/reblog
