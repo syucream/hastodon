@@ -23,6 +23,7 @@ module Web.Hastodon
   , getMutes
   , getNotifications
   , getNotificationById
+  , getSearchedResults
   , getRebloggedBy
   , getFavoritedBy
   , postStatus
@@ -59,7 +60,7 @@ pUnblock           = "/api/v1/accounts/:id/unblock"
 pMute              = "/api/v1/accounts/:id/mute"
 pUnmute            = "/api/v1/accounts/:id/unmute"
 pRelationships     = "/api/v1/accounts/relationships"
-pSearch            = "/api/v1/accounts/search"
+pSearchAccounts    = "/api/v1/accounts/search"
 pApps              = "/api/v1/apps"
 pBlocks            = "/api/v1/blocks"
 pFavorites         = "/api/v1/favourites"
@@ -69,6 +70,7 @@ pMutes             = "/api/v1/mutes"
 pNotifications     = "/api/v1/notifications"
 pNotificationById  = "/api/v1/notifications/:id"
 pNotificationClear = "/api/v1/notifications/clear"
+pSearch            = "/api/v1/search"
 pRebloggedBy       = "/api/v1/statuses/:id/reblogged_by"
 pFavoritedBy       = "/api/v1/statuses/:id/favourited_by"
 pStatuses          = "/api/v1/statuses"
@@ -218,6 +220,17 @@ instance FromJSON Relationship where
                  <*> (v .: T.pack "muting")
                  <*> (v .: T.pack "requested")
 
+data Results = Results {
+  resultAccounts :: [Account],
+  resultStatus :: [Status],
+  resultHashtags :: [String]
+} deriving (Show)
+instance FromJSON Results where
+  parseJSON (Object v) =
+    Results <$> (v .: T.pack "accounts")
+            <*> (v .: T.pack "statuses")
+            <*> (v .: T.pack "hashtags")
+
 data Status = Status {
   statusId :: Int,
   statusUri :: String,
@@ -340,7 +353,7 @@ getRelationships ids client = do
 
 getSearchedAccounts :: String -> HastodonClient -> IO (Either JSONException [Account])
 getSearchedAccounts query client = do
-  res <- getHastodonResponseJSON (pSearch ++ "?q=" ++ query) client
+  res <- getHastodonResponseJSON (pSearchAccounts ++ "?q=" ++ query) client
   return (getResponseBody res :: Either JSONException [Account])
 
 postFollow :: Int -> HastodonClient -> IO (Either JSONException Relationship)
@@ -415,6 +428,11 @@ getNotificationById :: Int -> HastodonClient -> IO (Either JSONException Notific
 getNotificationById id client = do
   res <- getHastodonResponseJSON (replace ":id" (show id) pNotificationById) client
   return (getResponseBody res :: Either JSONException Notification)
+
+getSearchedResults :: String -> HastodonClient -> IO (Either JSONException [Results])
+getSearchedResults query client = do
+  res <- getHastodonResponseJSON (pSearch ++ "?q=" ++ query) client
+  return (getResponseBody res :: Either JSONException [Results])
 
 getRebloggedBy :: Int -> HastodonClient -> IO (Either JSONException [Account])
 getRebloggedBy id client = do

@@ -50,7 +50,7 @@ main = do
 - [ ]  POST /api/v1/notifications/clear
 - [ ]  GET /api/v1/reports
 - [ ]  POST /api/v1/reports
-- [ ]  GET /api/v1/search
+- [x]  GET /api/v1/search
 - [ ]  GET /api/v1/statuses/:id
 - [ ]  GET /api/v1/statuses/:id/context
 - [ ]  GET /api/v1/statuses/:id/card
