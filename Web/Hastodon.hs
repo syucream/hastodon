@@ -13,9 +13,14 @@ module Web.Hastodon
   , getMutes
   , getRebloggedBy
   , getFavoritedBy
-  , postStatuses
+  , postStatus
+  , postReblog
+  , postUnreblog
+  , postFavorite
+  , postUnfavorite
   , getHomeTimeline
   , getPublicTimeline
+  , getTaggedTimeline
   ) where
 
 import Control.Applicative
@@ -40,8 +45,14 @@ pMutes           = "/api/v1/mutes"
 pRebloggedBy     = "/api/v1/statuses/:id/reblogged_by"
 pFavoritedBy     = "/api/v1/statuses/:id/favourited_by"
 pStatuses        = "/api/v1/statuses"
+pDeleteStatus    = "/api/v1/statuses/:id"
 pHomeTimeline    = "/api/v1/timelines/home"
 pPublicTimeline  = "/api/v1/timelines/public"
+pReblog          = "/api/v1/statuses/:id/reblog"
+pUnreblog        = "/api/v1/statuses/:id/unreblog"
+pFavorite        = "/api/v1/statuses/:id/favourite"
+pUnfavorite      = "/api/v1/statuses/:id/unfavourite"
+pTaggedTimeline  = "/api/v1/timelines/tag/:hashtag"
 
 data HastodonClient = HastodonClient {
   host :: String,
@@ -217,6 +228,11 @@ getHastodonResponseBody path client = do
 
 getHastodonResponseJSON path client = mkHastodonRequest path client >>= httpJSON
 
+postAndGetHastodonResponseJSON path body client = do
+  initReq <- mkHastodonRequest path client
+  let req = setRequestBodyURLEncoded body $ initReq
+  httpJSON req
+
 postHastodonRequestBody :: String -> [(Char8.ByteString, Char8.ByteString)] -> HastodonClient -> IO String
 postHastodonRequestBody path body client = do
   initReq <- mkHastodonRequest path client
@@ -279,8 +295,30 @@ getFavoritedBy id client = do
   res <- getHastodonResponseJSON (replace ":id" (show id) pFavoritedBy) client
   return (getResponseBody res :: [Account])
 
-postStatuses :: String -> HastodonClient -> IO String
-postStatuses statuses = postHastodonRequestBody pStatuses [(Char8.pack "status", Char8.pack statuses)]
+postStatus :: String -> HastodonClient -> IO Status
+postStatus status client = do
+  res <- postAndGetHastodonResponseJSON pStatuses [(Char8.pack "status", Char8.pack status)] client
+  return (getResponseBody res :: Status)
+
+postReblog :: Int -> HastodonClient -> IO Status
+postReblog id client = do
+  res <- postAndGetHastodonResponseJSON (replace ":id" (show id) pReblog) [] client
+  return (getResponseBody res :: Status)
+
+postUnreblog :: Int -> HastodonClient -> IO Status
+postUnreblog id client = do
+  res <- postAndGetHastodonResponseJSON (replace ":id" (show id) pUnreblog) [] client
+  return (getResponseBody res :: Status)
+
+postFavorite :: Int -> HastodonClient -> IO Status
+postFavorite id client = do
+  res <- postAndGetHastodonResponseJSON (replace ":id" (show id) pFavorite) [] client
+  return (getResponseBody res :: Status)
+
+postUnfavorite :: Int -> HastodonClient -> IO Status
+postUnfavorite id client = do
+  res <- postAndGetHastodonResponseJSON (replace ":id" (show id) pUnfavorite) [] client
+  return (getResponseBody res :: Status)
 
 getHomeTimeline :: HastodonClient -> IO [Status]
 getHomeTimeline client = do
@@ -290,4 +328,9 @@ getHomeTimeline client = do
 getPublicTimeline :: HastodonClient -> IO [Status]
 getPublicTimeline client = do
   res <- getHastodonResponseJSON pPublicTimeline client
+  return (getResponseBody res :: [Status])
+
+getTaggedTimeline :: String -> HastodonClient -> IO [Status]
+getTaggedTimeline hashtag client = do
+  res <- getHastodonResponseJSON (replace ":hashtag" hashtag pTaggedTimeline) client
   return (getResponseBody res :: [Status])
