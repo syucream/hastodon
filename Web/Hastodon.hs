@@ -83,22 +83,31 @@ instance FromJSON Account where
             <*> (v .: T.pack "header")
             <*> (v .: T.pack "header_static")
 
+data Application = Application {
+  applicationName :: String,
+  applicationWebsite :: Maybe String
+} deriving (Show)
+instance FromJSON Application where
+  parseJSON (Object v) =
+    Application <$> (v .:  T.pack "name")
+                <*> (v .:? T.pack "website")
+
 data Attachment = Attachment {
   attachmentId :: Int,
   attachmentType :: String,
   attachmentUrl :: String,
   attachmentRemoteUrl :: String,
   attachmentPreviewUrl :: String,
-  attachmentTextUrl :: String
+  attachmentTextUrl :: Maybe String
 } deriving (Show)
 instance FromJSON Attachment where
   parseJSON (Object v) =
-    Attachment <$> (v .: T.pack "id")
-               <*> (v .: T.pack "type")
-               <*> (v .: T.pack "url")
-               <*> (v .: T.pack "remote_url")
-               <*> (v .: T.pack "preview_url")
-               <*> (v .: T.pack "text_url")
+    Attachment <$> (v .:  T.pack "id")
+               <*> (v .:  T.pack "type")
+               <*> (v .:  T.pack "url")
+               <*> (v .:  T.pack "remote_url")
+               <*> (v .:  T.pack "preview_url")
+               <*> (v .:? T.pack "text_url")
 
 data Relationship = Relationship {
   relationshipId :: Int,
@@ -139,29 +148,50 @@ instance FromJSON Tag where
     Tag <$> (v .: T.pack "name")
         <*> (v .: T.pack "url")
 
--- TODO
--- data Status = Status {
---   id :: Int,
---   uri :: String,
---   url :: String,
---   account :: Account,
---   in_reply_to_id :: Maybe Int,
---   in_reply_to_account_id :: Maybe Int,
---   reblog :: Maybe Status,
---   content :: String,
---   created_at :: String,
---   reblogs_count :: Int,
---   favourites_count :: Int,
---   reblogged :: Bool,
---   favourited :: Bool,
---   sensitive :: Bool,
---   spoiler_text :: String,
---   visibility :: String,
---   media_attachments :: Attachments,
---   mentions :: Mentions,
---   tags :: Tags,
---   application :: Application
--- }
+data Status = Status {
+  statusId :: Int,
+  statusUri :: String,
+  statusUrl :: String,
+  statusAccount :: Account,
+  statusInReplyToId :: Maybe Int,
+  statusInReplyToAccountId :: Maybe Int,
+  statusReblog :: Maybe Status,
+  statusContent :: String,
+  statusCreatedAt :: String,
+  statusReblogsCount :: Int,
+  statusFavouritesCount :: Int,
+  statusReblogged :: Maybe Bool,
+  statusFavourited :: Maybe Bool,
+  statusSensitive :: Maybe Bool,
+  statusSpoilerText :: String,
+  statusVisibility :: String,
+  statusMediaAttachments :: [Attachment],
+  statusMentions :: [Mention],
+  statusTags :: [Tag],
+  statusApplication :: Maybe Application
+} deriving (Show)
+instance FromJSON Status where
+  parseJSON (Object v) =
+    Status <$> (v .:  T.pack "id")
+           <*> (v .:  T.pack "uri")
+           <*> (v .:  T.pack "url")
+           <*> (v .:  T.pack "account")
+           <*> (v .:? T.pack "in_reply_to_id")
+           <*> (v .:? T.pack "in_reply_to_account_id")
+           <*> (v .:? T.pack "reblog")
+           <*> (v .:  T.pack "content")
+           <*> (v .:  T.pack "created_at")
+           <*> (v .:  T.pack "reblogs_count")
+           <*> (v .:  T.pack "favourites_count")
+           <*> (v .:? T.pack "reblogged")
+           <*> (v .:? T.pack "favourited")
+           <*> (v .:? T.pack "sensitive")
+           <*> (v .:  T.pack "spoiler_text")
+           <*> (v .:  T.pack "visibility")
+           <*> (v .:  T.pack "media_attachments")
+           <*> (v .:  T.pack "mentions")
+           <*> (v .:  T.pack "tags")
+           <*> (v .:? T.pack "application")
 
 -- 
 -- helpers
@@ -252,10 +282,12 @@ getFavoritedBy id client = do
 postStatuses :: String -> HastodonClient -> IO String
 postStatuses statuses = postHastodonRequestBody pStatuses [(Char8.pack "status", Char8.pack statuses)]
 
--- TODO return IO Status
-getHomeTimeline :: HastodonClient -> IO String
-getHomeTimeline client = getHastodonResponseBody pHomeTimeline client >>= toIOString
+getHomeTimeline :: HastodonClient -> IO [Status]
+getHomeTimeline client = do
+  res <- getHastodonResponseJSON pHomeTimeline client
+  return (getResponseBody res :: [Status])
 
--- TODO return IO Status
-getPublicTimeline :: HastodonClient -> IO String
-getPublicTimeline client = getHastodonResponseBody pPublicTimeline client >>= toIOString
+getPublicTimeline :: HastodonClient -> IO [Status]
+getPublicTimeline client = do
+  res <- getHastodonResponseJSON pPublicTimeline client
+  return (getResponseBody res :: [Status])
