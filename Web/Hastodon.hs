@@ -1,5 +1,4 @@
 {-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE LambdaCase #-}
 
 module Web.Hastodon
   (
@@ -18,14 +17,14 @@ import Data.Aeson
 import qualified Data.ByteString.Char8 as Char8
 import qualified Data.ByteString.Lazy.Char8 as LChar8
 import qualified Data.Text as T
-import qualified Data.Vector as V
+import Data.String.Utils
 import Network.HTTP.Simple
 import Network.HTTP.Types.Header
 
 --
 -- Mastodon API endpoints
 --
-pAccountById     = "/api/v1/accounts/" -- :id
+pAccountById     = "/api/v1/accounts/:id"
 pCurrentAccounts = "/api/v1/accounts/verify_credentials"
 pRelationships   = "/api/v1/accounts/relationships"
 pStatuses        = "/api/v1/statuses"
@@ -153,7 +152,7 @@ mkHastodonClient host token = HastodonClient host token
 
 getAccountById :: Int -> HastodonClient -> IO Account
 getAccountById id client = do
-  res <- getHastodonResponseJSON (pAccountById ++ (show id)) client
+  res <- getHastodonResponseJSON (replace ":id" (show id) pAccountById) client
   return (getResponseBody res :: Account)
 
 getCurrentAccount :: HastodonClient -> IO Account

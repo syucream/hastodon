@@ -18,6 +18,13 @@ Source-repository head
 
 Library
   default-language: Haskell2010
-  Build-Depends: base, bytestring, http-types, http-conduit
+  Build-Depends: base,
+                 aeson,
+                 bytestring,
+                 http-types,
+                 http-conduit,
+                 MissingH,
+                 text
+
   Exposed-Modules: Web.Hastodon
   Other-Modules:
