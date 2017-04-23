@@ -130,19 +130,6 @@ instance FromJSON Application where
     Application <$> (v .:  T.pack "name")
                 <*> (v .:? T.pack "website")
 
-data OAuthClient = OAuthClient {
-  oauthClientId :: Int,
-  oauthClientRedirectUri :: String,
-  oauthClientClientId :: String,
-  oauthClientClientSecret :: String
-} deriving (Show)
-instance FromJSON OAuthClient where
-  parseJSON (Object v) =
-    OAuthClient <$> (v .: T.pack "id")
-                <*> (v .: T.pack "redirect_uri")
-                <*> (v .: T.pack "client_id")
-                <*> (v .: T.pack "client_secret")
-
 data Attachment = Attachment {
   attachmentId :: Int,
   attachmentType :: String,
@@ -159,23 +146,6 @@ instance FromJSON Attachment where
                <*> (v .:  T.pack "remote_url")
                <*> (v .:  T.pack "preview_url")
                <*> (v .:? T.pack "text_url")
-
-data Relationship = Relationship {
-  relationshipId :: Int,
-  relationshipFollowing :: Bool,
-  relationshipFollowed_by :: Bool,
-  relationshipBlocking :: Bool,
-  relationshipMuting :: Bool,
-  relationshipRequested :: Bool
-} deriving (Show)
-instance FromJSON Relationship where
-  parseJSON (Object v) =
-    Relationship <$> (v .: T.pack "id")
-                 <*> (v .: T.pack "following")
-                 <*> (v .: T.pack "followed_by")
-                 <*> (v .: T.pack "blocking")
-                 <*> (v .: T.pack "muting")
-                 <*> (v .: T.pack "requested")
 
 data Instance = Instance {
   instanceUri :: String,
@@ -218,14 +188,35 @@ instance FromJSON Notification where
                  <*> (v .:  T.pack "account")
                  <*> (v .:? T.pack "status")
 
-data Tag = Tag {
-  name :: String,
-  url :: String
+data OAuthClient = OAuthClient {
+  oauthClientId :: Int,
+  oauthClientRedirectUri :: String,
+  oauthClientClientId :: String,
+  oauthClientClientSecret :: String
 } deriving (Show)
-instance FromJSON Tag where
+instance FromJSON OAuthClient where
   parseJSON (Object v) =
-    Tag <$> (v .: T.pack "name")
-        <*> (v .: T.pack "url")
+    OAuthClient <$> (v .: T.pack "id")
+                <*> (v .: T.pack "redirect_uri")
+                <*> (v .: T.pack "client_id")
+                <*> (v .: T.pack "client_secret")
+
+data Relationship = Relationship {
+  relationshipId :: Int,
+  relationshipFollowing :: Bool,
+  relationshipFollowed_by :: Bool,
+  relationshipBlocking :: Bool,
+  relationshipMuting :: Bool,
+  relationshipRequested :: Bool
+} deriving (Show)
+instance FromJSON Relationship where
+  parseJSON (Object v) =
+    Relationship <$> (v .: T.pack "id")
+                 <*> (v .: T.pack "following")
+                 <*> (v .: T.pack "followed_by")
+                 <*> (v .: T.pack "blocking")
+                 <*> (v .: T.pack "muting")
+                 <*> (v .: T.pack "requested")
 
 data Status = Status {
   statusId :: Int,
@@ -272,6 +263,15 @@ instance FromJSON Status where
            <*> (v .:  T.pack "tags")
            <*> (v .:? T.pack "application")
 
+data Tag = Tag {
+  name :: String,
+  url :: String
+} deriving (Show)
+instance FromJSON Tag where
+  parseJSON (Object v) =
+    Tag <$> (v .: T.pack "name")
+        <*> (v .: T.pack "url")
+
 -- 
 -- helpers
 -- 
@@ -291,12 +291,12 @@ getHastodonResponseBody path client = do
   res <- httpLBS req
   return $ getResponseBody res
 
-getHastodonResponseJSON path client = mkHastodonRequest path client >>= httpJSON
+getHastodonResponseJSON path client = mkHastodonRequest path client >>= httpJSONEither
 
 postAndGetHastodonResponseJSON path body client = do
   initReq <- mkHastodonRequest path client
   let req = setRequestBodyURLEncoded body $ initReq
-  httpJSON req
+  httpJSONEither req
 
 -- 
 -- exported functions
@@ -305,163 +305,163 @@ postAndGetHastodonResponseJSON path body client = do
 mkHastodonClient :: String -> String -> HastodonClient
 mkHastodonClient host token = HastodonClient host token
 
-getAccountById :: Int -> HastodonClient -> IO Account
+getAccountById :: Int -> HastodonClient -> IO (Either JSONException Account)
 getAccountById id client = do
   res <- getHastodonResponseJSON (replace ":id" (show id) pAccountById) client
-  return (getResponseBody res :: Account)
+  return (getResponseBody res :: Either JSONException Account)
 
-getCurrentAccount :: HastodonClient -> IO Account
+getCurrentAccount :: HastodonClient -> IO (Either JSONException Account)
 getCurrentAccount client = do
   res <- getHastodonResponseJSON pCurrentAccounts client
-  return (getResponseBody res :: Account)
+  return (getResponseBody res :: Either JSONException Account)
 
 -- TODO support options
-getFollowers :: Int -> HastodonClient -> IO [Account]
+getFollowers :: Int -> HastodonClient -> IO (Either JSONException [Account])
 getFollowers id client = do
   res <- getHastodonResponseJSON (replace ":id" (show id) pFollowers) client
-  return (getResponseBody res :: [Account])
+  return (getResponseBody res :: Either JSONException [Account])
 
-getFollowing :: Int -> HastodonClient -> IO [Account]
+getFollowing :: Int -> HastodonClient -> IO (Either JSONException [Account])
 getFollowing id client = do
   res <- getHastodonResponseJSON (replace ":id" (show id) pFollowing) client
-  return (getResponseBody res :: [Account])
+  return (getResponseBody res :: Either JSONException [Account])
 
-getAccountStatuses :: Int -> HastodonClient -> IO [Status]
+getAccountStatuses :: Int -> HastodonClient -> IO (Either JSONException [Status])
 getAccountStatuses id client = do
   res <- getHastodonResponseJSON (replace ":id" (show id) pAccountStatuses) client
-  return (getResponseBody res :: [Status])
+  return (getResponseBody res :: Either JSONException [Status])
 
-getRelationships :: [Int] -> HastodonClient -> IO [Relationship]
+getRelationships :: [Int] -> HastodonClient -> IO (Either JSONException [Relationship])
 getRelationships ids client = do
   let intIds = map (show) ids
   let params = foldl (\x y -> x ++ (if x == "" then "?" else "&") ++ "id%5b%5d=" ++ y) "" intIds
   res <- getHastodonResponseJSON (pRelationships ++ params) client
-  return (getResponseBody res :: [Relationship])
+  return (getResponseBody res :: Either JSONException [Relationship])
 
-getSearchedAccounts :: String -> HastodonClient -> IO [Account]
+getSearchedAccounts :: String -> HastodonClient -> IO (Either JSONException [Account])
 getSearchedAccounts query client = do
   res <- getHastodonResponseJSON (pSearch ++ "?q=" ++ query) client
-  return (getResponseBody res :: [Account])
+  return (getResponseBody res :: Either JSONException [Account])
 
-postFollow :: Int -> HastodonClient -> IO Relationship
+postFollow :: Int -> HastodonClient -> IO (Either JSONException Relationship)
 postFollow id client = do
   res <- postAndGetHastodonResponseJSON (replace ":id" (show id) pFollow) [] client
-  return (getResponseBody res :: Relationship)
+  return (getResponseBody res :: Either JSONException Relationship)
 
-postUnfollow :: Int -> HastodonClient -> IO Relationship
+postUnfollow :: Int -> HastodonClient -> IO (Either JSONException Relationship)
 postUnfollow id client = do
   res <- postAndGetHastodonResponseJSON (replace ":id" (show id) pUnfollow) [] client
-  return (getResponseBody res :: Relationship)
+  return (getResponseBody res :: Either JSONException Relationship)
 
-postBlock :: Int -> HastodonClient -> IO Relationship
+postBlock :: Int -> HastodonClient -> IO (Either JSONException Relationship)
 postBlock id client = do
   res <- postAndGetHastodonResponseJSON (replace ":id" (show id) pBlock) [] client
-  return (getResponseBody res :: Relationship)
+  return (getResponseBody res :: Either JSONException Relationship)
 
-postUnblock :: Int -> HastodonClient -> IO Relationship
+postUnblock :: Int -> HastodonClient -> IO (Either JSONException Relationship)
 postUnblock id client = do
   res <- postAndGetHastodonResponseJSON (replace ":id" (show id) pUnblock) [] client
-  return (getResponseBody res :: Relationship)
+  return (getResponseBody res :: Either JSONException Relationship)
 
-postMute :: Int -> HastodonClient -> IO Relationship
+postMute :: Int -> HastodonClient -> IO (Either JSONException Relationship)
 postMute id client = do
   res <- postAndGetHastodonResponseJSON (replace ":id" (show id) pMute) [] client
-  return (getResponseBody res :: Relationship)
+  return (getResponseBody res :: Either JSONException Relationship)
 
-postUnmute :: Int -> HastodonClient -> IO Relationship
+postUnmute :: Int -> HastodonClient -> IO (Either JSONException Relationship)
 postUnmute id client = do
   res <- postAndGetHastodonResponseJSON (replace ":id" (show id) pUnmute) [] client
-  return (getResponseBody res :: Relationship)
+  return (getResponseBody res :: Either JSONException Relationship)
 
-postApps :: String -> HastodonClient -> IO OAuthClient
+postApps :: String -> HastodonClient -> IO (Either JSONException OAuthClient)
 postApps clientName client = do
   let reqBody = [(Char8.pack "client_name", Char8.pack clientName),
                  (Char8.pack "redirect_uris", Char8.pack "urn:ietf:wg:oauth:2.0:oob"),
                  (Char8.pack "scopes", Char8.pack "read write follow")]
   res <- postAndGetHastodonResponseJSON pApps reqBody client
-  return (getResponseBody res :: OAuthClient)
+  return (getResponseBody res :: Either JSONException OAuthClient)
 
-getBlocks :: HastodonClient -> IO [Account]
+getBlocks :: HastodonClient -> IO (Either JSONException [Account])
 getBlocks client = do
   res <- getHastodonResponseJSON pBlocks client
-  return (getResponseBody res :: [Account])
+  return (getResponseBody res :: Either JSONException [Account])
 
-getFavorites :: HastodonClient -> IO [Status]
+getFavorites :: HastodonClient -> IO (Either JSONException [Status])
 getFavorites client = do
   res <- getHastodonResponseJSON pFavorites client
-  return (getResponseBody res :: [Status])
+  return (getResponseBody res :: Either JSONException [Status])
 
-getFollowRequests :: HastodonClient -> IO [Account]
+getFollowRequests :: HastodonClient -> IO (Either JSONException [Account])
 getFollowRequests client = do
   res <- getHastodonResponseJSON pFollowRequests client
-  return (getResponseBody res :: [Account])
+  return (getResponseBody res :: Either JSONException [Account])
 
-getInstance :: HastodonClient -> IO Instance
+getInstance :: HastodonClient -> IO (Either JSONException Instance)
 getInstance client = do
   res <- getHastodonResponseJSON pInstance client
-  return (getResponseBody res :: Instance)
+  return (getResponseBody res :: Either JSONException Instance)
 
-getMutes :: HastodonClient -> IO [Account]
+getMutes :: HastodonClient -> IO (Either JSONException [Account])
 getMutes client = do
   res <- getHastodonResponseJSON pMutes client
-  return (getResponseBody res :: [Account])
+  return (getResponseBody res :: Either JSONException [Account])
 
-getNotifications :: HastodonClient -> IO [Notification]
+getNotifications :: HastodonClient -> IO (Either JSONException [Notification])
 getNotifications client = do
   res <- getHastodonResponseJSON pNotifications client
-  return (getResponseBody res :: [Notification])
+  return (getResponseBody res :: Either JSONException [Notification])
 
-getNotificationById :: Int -> HastodonClient -> IO Notification
+getNotificationById :: Int -> HastodonClient -> IO (Either JSONException Notification)
 getNotificationById id client = do
   res <- getHastodonResponseJSON (replace ":id" (show id) pNotificationById) client
-  return (getResponseBody res :: Notification)
+  return (getResponseBody res :: Either JSONException Notification)
 
-getRebloggedBy :: Int -> HastodonClient -> IO [Account]
+getRebloggedBy :: Int -> HastodonClient -> IO (Either JSONException [Account])
 getRebloggedBy id client = do
   res <- getHastodonResponseJSON (replace ":id" (show id) pRebloggedBy) client
-  return (getResponseBody res :: [Account])
+  return (getResponseBody res :: Either JSONException [Account])
 
-getFavoritedBy :: Int -> HastodonClient -> IO [Account]
+getFavoritedBy :: Int -> HastodonClient -> IO (Either JSONException [Account])
 getFavoritedBy id client = do
   res <- getHastodonResponseJSON (replace ":id" (show id) pFavoritedBy) client
-  return (getResponseBody res :: [Account])
+  return (getResponseBody res :: Either JSONException [Account])
 
-postStatus :: String -> HastodonClient -> IO Status
+postStatus :: String -> HastodonClient -> IO (Either JSONException Status)
 postStatus status client = do
   res <- postAndGetHastodonResponseJSON pStatuses [(Char8.pack "status", Char8.pack status)] client
-  return (getResponseBody res :: Status)
+  return (getResponseBody res :: Either JSONException Status)
 
-postReblog :: Int -> HastodonClient -> IO Status
+postReblog :: Int -> HastodonClient -> IO (Either JSONException Status)
 postReblog id client = do
   res <- postAndGetHastodonResponseJSON (replace ":id" (show id) pReblog) [] client
-  return (getResponseBody res :: Status)
+  return (getResponseBody res :: Either JSONException Status)
 
-postUnreblog :: Int -> HastodonClient -> IO Status
+postUnreblog :: Int -> HastodonClient -> IO (Either JSONException Status)
 postUnreblog id client = do
   res <- postAndGetHastodonResponseJSON (replace ":id" (show id) pUnreblog) [] client
-  return (getResponseBody res :: Status)
+  return (getResponseBody res :: Either JSONException Status)
 
-postFavorite :: Int -> HastodonClient -> IO Status
+postFavorite :: Int -> HastodonClient -> IO (Either JSONException Status)
 postFavorite id client = do
   res <- postAndGetHastodonResponseJSON (replace ":id" (show id) pFavorite) [] client
-  return (getResponseBody res :: Status)
+  return (getResponseBody res :: Either JSONException Status)
 
-postUnfavorite :: Int -> HastodonClient -> IO Status
+postUnfavorite :: Int -> HastodonClient -> IO (Either JSONException Status)
 postUnfavorite id client = do
   res <- postAndGetHastodonResponseJSON (replace ":id" (show id) pUnfavorite) [] client
-  return (getResponseBody res :: Status)
+  return (getResponseBody res :: Either JSONException Status)
 
-getHomeTimeline :: HastodonClient -> IO [Status]
+getHomeTimeline :: HastodonClient -> IO (Either JSONException [Status])
 getHomeTimeline client = do
   res <- getHastodonResponseJSON pHomeTimeline client
-  return (getResponseBody res :: [Status])
+  return (getResponseBody res :: Either JSONException [Status])
 
-getPublicTimeline :: HastodonClient -> IO [Status]
+getPublicTimeline :: HastodonClient -> IO (Either JSONException [Status])
 getPublicTimeline client = do
   res <- getHastodonResponseJSON pPublicTimeline client
-  return (getResponseBody res :: [Status])
+  return (getResponseBody res :: Either JSONException [Status])
 
-getTaggedTimeline :: String -> HastodonClient -> IO [Status]
+getTaggedTimeline :: String -> HastodonClient -> IO (Either JSONException [Status])
 getTaggedTimeline hashtag client = do
   res <- getHastodonResponseJSON (replace ":hashtag" hashtag pTaggedTimeline) client
-  return (getResponseBody res :: [Status])
+  return (getResponseBody res :: Either JSONException [Status])
