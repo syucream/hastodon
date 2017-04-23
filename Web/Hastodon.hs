@@ -6,7 +6,10 @@ module Web.Hastodon
 
   , getAccountById
   , getCurrentAccount
+  , getFollowers
+  , getFollowing
   , getRelationships
+  , getMutes
   , postStatuses
   , getHomeTimeline
   , getPublicTimeline
@@ -26,7 +29,10 @@ import Network.HTTP.Types.Header
 --
 pAccountById     = "/api/v1/accounts/:id"
 pCurrentAccounts = "/api/v1/accounts/verify_credentials"
+pFollowers       = "/api/v1/accounts/:id/followers"
+pFollowing       = "/api/v1/accounts/:id/following"
 pRelationships   = "/api/v1/accounts/relationships"
+pMutes           = "/api/v1/mutes"
 pStatuses        = "/api/v1/statuses"
 pHomeTimeline    = "/api/v1/timelines/home"
 pPublicTimeline  = "/api/v1/timelines/public"
@@ -160,12 +166,28 @@ getCurrentAccount client = do
   res <- getHastodonResponseJSON pCurrentAccounts client
   return (getResponseBody res :: Account)
 
+-- TODO support options
+getFollowers :: Int -> HastodonClient -> IO [Account]
+getFollowers id client = do
+  res <- getHastodonResponseJSON (replace ":id" (show id) pFollowers) client
+  return (getResponseBody res :: [Account])
+
+getFollowing :: Int -> HastodonClient -> IO [Account]
+getFollowing id client = do
+  res <- getHastodonResponseJSON (replace ":id" (show id) pFollowing) client
+  return (getResponseBody res :: [Account])
+
 getRelationships :: [Int] -> HastodonClient -> IO [Relationship]
 getRelationships ids client = do
   let intIds = map (show) ids
   let params = foldl (\x y -> x ++ (if x == "" then "?" else "&") ++ "id%5b%5d=" ++ y) "" intIds
   res <- getHastodonResponseJSON (pRelationships ++ params) client
   return (getResponseBody res :: [Relationship])
+
+getMutes :: HastodonClient -> IO [Account]
+getMutes client = do
+  res <- getHastodonResponseJSON pMutes client
+  return (getResponseBody res :: [Account])
 
 postStatuses :: String -> HastodonClient -> IO String
 postStatuses statuses = postHastodonRequestBody pStatuses [(Char8.pack "status", Char8.pack statuses)]

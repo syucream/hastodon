@@ -24,8 +24,8 @@ main = do
 - [x]  GET /api/v1/accounts/:id
 - [x]  GET /api/v1/accounts/verify_credentials
 - [ ]  PATCH /api/v1/accounts/update_credentials
-- [ ]  GET /api/v1/accounts/:id/followers
-- [ ]  GET /api/v1/accounts/:id/following
+- [x]  GET /api/v1/accounts/:id/followers
+- [x]  GET /api/v1/accounts/:id/following
 - [ ]  GET /api/v1/accounts/:id/statuses
 - [ ]  POST /api/v1/accounts/:id/follow
 - [ ]  POST /api/v1/accounts/:id/unfollow
@@ -44,7 +44,7 @@ main = do
 - [ ]  POST /api/v1/follows
 - [ ]  GET /api/v1/instance
 - [ ]  POST /api/v1/media
-- [ ]  GET /api/v1/mutes
+- [x]  GET /api/v1/mutes
 - [ ]  GET /api/v1/notifications
 - [ ]  GET /api/v1/notifications/:id
 - [ ]  POST /api/v1/notifications/clear
