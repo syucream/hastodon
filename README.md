@@ -37,16 +37,16 @@ main = do
 - [x]  GET /api/v1/accounts/search
 - [x]  POST /api/v1/apps
 - [x]  GET /api/v1/blocks
-- [ ]  GET /api/v1/favourites
-- [ ]  GET /api/v1/follow_requests
+- [x]  GET /api/v1/favourites
+- [x]  GET /api/v1/follow_requests
 - [ ]  POST /api/v1/follow_requests/:id/authorize
 - [ ]  POST /api/v1/follow_requests/:id/reject
 - [ ]  POST /api/v1/follows
-- [ ]  GET /api/v1/instance
+- [x]  GET /api/v1/instance
 - [ ]  POST /api/v1/media
 - [x]  GET /api/v1/mutes
-- [ ]  GET /api/v1/notifications
-- [ ]  GET /api/v1/notifications/:id
+- [x]  GET /api/v1/notifications
+- [x]  GET /api/v1/notifications/:id
 - [ ]  POST /api/v1/notifications/clear
 - [ ]  GET /api/v1/reports
 - [ ]  POST /api/v1/reports

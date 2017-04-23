@@ -17,7 +17,12 @@ module Web.Hastodon
   , getSearchedAccounts
   , postApps
   , getBlocks
+  , getFavorites
+  , getFollowRequests
+  , getInstance
   , getMutes
+  , getNotifications
+  , getNotificationById
   , getRebloggedBy
   , getFavoritedBy
   , postStatus
@@ -42,33 +47,39 @@ import Network.HTTP.Types.Header
 --
 -- Mastodon API endpoints
 --
-pAccountById     = "/api/v1/accounts/:id"
-pCurrentAccounts = "/api/v1/accounts/verify_credentials"
-pFollowers       = "/api/v1/accounts/:id/followers"
-pFollowing       = "/api/v1/accounts/:id/following"
-pAccountStatuses = "/api/v1/accounts/:id/statuses"
-pFollow          = "/api/v1/accounts/:id/follow"
-pUnfollow        = "/api/v1/accounts/:id/unfollow"
-pBlock           = "/api/v1/accounts/:id/block"
-pUnblock         = "/api/v1/accounts/:id/unblock"
-pMute            = "/api/v1/accounts/:id/mute"
-pUnmute          = "/api/v1/accounts/:id/unmute"
-pRelationships   = "/api/v1/accounts/relationships"
-pSearch          = "/api/v1/accounts/search"
-pApps            = "/api/v1/apps"
-pBlocks          = "/api/v1/blocks"
-pMutes           = "/api/v1/mutes"
-pRebloggedBy     = "/api/v1/statuses/:id/reblogged_by"
-pFavoritedBy     = "/api/v1/statuses/:id/favourited_by"
-pStatuses        = "/api/v1/statuses"
-pDeleteStatus    = "/api/v1/statuses/:id"
-pHomeTimeline    = "/api/v1/timelines/home"
-pPublicTimeline  = "/api/v1/timelines/public"
-pReblog          = "/api/v1/statuses/:id/reblog"
-pUnreblog        = "/api/v1/statuses/:id/unreblog"
-pFavorite        = "/api/v1/statuses/:id/favourite"
-pUnfavorite      = "/api/v1/statuses/:id/unfavourite"
-pTaggedTimeline  = "/api/v1/timelines/tag/:hashtag"
+pAccountById       = "/api/v1/accounts/:id"
+pCurrentAccounts   = "/api/v1/accounts/verify_credentials"
+pFollowers         = "/api/v1/accounts/:id/followers"
+pFollowing         = "/api/v1/accounts/:id/following"
+pAccountStatuses   = "/api/v1/accounts/:id/statuses"
+pFollow            = "/api/v1/accounts/:id/follow"
+pUnfollow          = "/api/v1/accounts/:id/unfollow"
+pBlock             = "/api/v1/accounts/:id/block"
+pUnblock           = "/api/v1/accounts/:id/unblock"
+pMute              = "/api/v1/accounts/:id/mute"
+pUnmute            = "/api/v1/accounts/:id/unmute"
+pRelationships     = "/api/v1/accounts/relationships"
+pSearch            = "/api/v1/accounts/search"
+pApps              = "/api/v1/apps"
+pBlocks            = "/api/v1/blocks"
+pFavorites         = "/api/v1/favourites"
+pFollowRequests    = "/api/v1/follow_requests"
+pInstance          = "/api/v1/instance"
+pMutes             = "/api/v1/mutes"
+pNotifications     = "/api/v1/notifications"
+pNotificationById  = "/api/v1/notifications/:id"
+pNotificationClear = "/api/v1/notifications/clear"
+pRebloggedBy       = "/api/v1/statuses/:id/reblogged_by"
+pFavoritedBy       = "/api/v1/statuses/:id/favourited_by"
+pStatuses          = "/api/v1/statuses"
+pDeleteStatus      = "/api/v1/statuses/:id"
+pHomeTimeline      = "/api/v1/timelines/home"
+pPublicTimeline    = "/api/v1/timelines/public"
+pReblog            = "/api/v1/statuses/:id/reblog"
+pUnreblog          = "/api/v1/statuses/:id/unreblog"
+pFavorite          = "/api/v1/statuses/:id/favourite"
+pUnfavorite        = "/api/v1/statuses/:id/unfavourite"
+pTaggedTimeline    = "/api/v1/timelines/tag/:hashtag"
 
 data HastodonClient = HastodonClient {
   host :: String,
@@ -166,6 +177,19 @@ instance FromJSON Relationship where
                  <*> (v .: T.pack "muting")
                  <*> (v .: T.pack "requested")
 
+data Instance = Instance {
+  instanceUri :: String,
+  instanceTitle :: String,
+  instanceDescription :: String,
+  instanceEmail :: String
+} deriving (Show)
+instance FromJSON Instance where
+  parseJSON (Object v) =
+    Instance <$> (v .: T.pack "uri")
+             <*> (v .: T.pack "title")
+             <*> (v .: T.pack "description")
+             <*> (v .: T.pack "email")
+
 data Mention = Mention {
   mentionUrl :: String,
   mentionUsername :: String,
@@ -178,6 +202,21 @@ instance FromJSON Mention where
             <*> (v .: T.pack "username")
             <*> (v .: T.pack "acct")
             <*> (v .: T.pack "id")
+
+data Notification = Notification {
+  notificationId :: Int,
+  notificationType :: String,
+  notificationCreatedAt :: String,
+  notificationAccount :: Account,
+  notificationStatus :: Maybe Status
+} deriving (Show)
+instance FromJSON Notification where
+  parseJSON (Object v) =
+    Notification <$> (v .:  T.pack "id")
+                 <*> (v .:  T.pack "type")
+                 <*> (v .:  T.pack "created_at")
+                 <*> (v .:  T.pack "account")
+                 <*> (v .:? T.pack "status")
 
 data Tag = Tag {
   name :: String,
@@ -347,10 +386,35 @@ getBlocks client = do
   res <- getHastodonResponseJSON pBlocks client
   return (getResponseBody res :: [Account])
 
+getFavorites :: HastodonClient -> IO [Status]
+getFavorites client = do
+  res <- getHastodonResponseJSON pFavorites client
+  return (getResponseBody res :: [Status])
+
+getFollowRequests :: HastodonClient -> IO [Account]
+getFollowRequests client = do
+  res <- getHastodonResponseJSON pFollowRequests client
+  return (getResponseBody res :: [Account])
+
+getInstance :: HastodonClient -> IO Instance
+getInstance client = do
+  res <- getHastodonResponseJSON pInstance client
+  return (getResponseBody res :: Instance)
+
 getMutes :: HastodonClient -> IO [Account]
 getMutes client = do
   res <- getHastodonResponseJSON pMutes client
   return (getResponseBody res :: [Account])
+
+getNotifications :: HastodonClient -> IO [Notification]
+getNotifications client = do
+  res <- getHastodonResponseJSON pNotifications client
+  return (getResponseBody res :: [Notification])
+
+getNotificationById :: Int -> HastodonClient -> IO Notification
+getNotificationById id client = do
+  res <- getHastodonResponseJSON (replace ":id" (show id) pNotificationById) client
+  return (getResponseBody res :: Notification)
 
 getRebloggedBy :: Int -> HastodonClient -> IO [Account]
 getRebloggedBy id client = do
