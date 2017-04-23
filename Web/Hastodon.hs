@@ -237,9 +237,6 @@ instance FromJSON Status where
 -- helpers
 -- 
 
-toIOString :: LChar8.ByteString -> IO String
-toIOString bs = return $ LChar8.unpack bs
-
 mkHastodonHeader :: String -> Request -> Request
 mkHastodonHeader token =
   addRequestHeader hAuthorization $ Char8.pack $ "Bearer " ++ token
@@ -261,13 +258,6 @@ postAndGetHastodonResponseJSON path body client = do
   initReq <- mkHastodonRequest path client
   let req = setRequestBodyURLEncoded body $ initReq
   httpJSON req
-
-postHastodonRequestBody :: String -> [(Char8.ByteString, Char8.ByteString)] -> HastodonClient -> IO String
-postHastodonRequestBody path body client = do
-  initReq <- mkHastodonRequest path client
-  let req = setRequestBodyURLEncoded body $ initReq
-  res <- httpLBS req
-  return $ LChar8.unpack $ getResponseBody res
 
 -- 
 -- exported functions
