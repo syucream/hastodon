@@ -23,6 +23,7 @@ module Web.Hastodon
   , getMutes
   , getNotifications
   , getNotificationById
+  , postNotificationsClear
   , getSearchedResults
   , getRebloggedBy
   , getFavoritedBy
@@ -306,6 +307,12 @@ getHastodonResponseBody path client = do
 
 getHastodonResponseJSON path client = mkHastodonRequest path client >>= httpJSONEither
 
+postAndGetHastodonResult path body client = do
+  initReq <- mkHastodonRequest path client
+  let req = setRequestBodyURLEncoded body $ initReq
+  res <- httpNoBody req
+  return $ (getResponseStatusCode res) == 200
+
 postAndGetHastodonResponseJSON path body client = do
   initReq <- mkHastodonRequest path client
   let req = setRequestBodyURLEncoded body $ initReq
@@ -428,6 +435,9 @@ getNotificationById :: Int -> HastodonClient -> IO (Either JSONException Notific
 getNotificationById id client = do
   res <- getHastodonResponseJSON (replace ":id" (show id) pNotificationById) client
   return (getResponseBody res :: Either JSONException Notification)
+
+postNotificationsClear :: HastodonClient -> IO Bool
+postNotificationsClear = postAndGetHastodonResult pNotificationClear []
 
 getSearchedResults :: String -> HastodonClient -> IO (Either JSONException [Results])
 getSearchedResults query client = do

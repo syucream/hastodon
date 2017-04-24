@@ -49,7 +49,7 @@ main = do
 - [x]  GET /api/v1/mutes
 - [x]  GET /api/v1/notifications
 - [x]  GET /api/v1/notifications/:id
-- [ ]  POST /api/v1/notifications/clear
+- [x]  POST /api/v1/notifications/clear
 - [ ]  GET /api/v1/reports
 - [ ]  POST /api/v1/reports
 - [x]  GET /api/v1/search
