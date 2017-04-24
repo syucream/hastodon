@@ -1,6 +1,7 @@
 # Hastodon
 
 [![Build Status](https://travis-ci.org/syucream/hastodon.svg?branch=master)](https://travis-ci.org/syucream/hastodon)
+[![Hackage-Deps](https://img.shields.io/hackage-deps/v/Hastodon.svg)](http://packdeps.haskellers.com/feed?needle=Hastodon)
 
 mastodon client module for Haskell
 
