@@ -25,6 +25,9 @@ module Web.Hastodon
   , getNotificationById
   , postNotificationsClear
   , getSearchedResults
+  , getStatus
+  , getCard
+  , getContext
   , getRebloggedBy
   , getFavoritedBy
   , postStatus
@@ -72,6 +75,9 @@ pNotifications     = "/api/v1/notifications"
 pNotificationById  = "/api/v1/notifications/:id"
 pNotificationClear = "/api/v1/notifications/clear"
 pSearch            = "/api/v1/search"
+pStatus            = "/api/v1/statuses/:id"
+pContext           = "/api/v1/statuses/:id/context"
+pCard              = "/api/v1/statuses/:id/card"
 pRebloggedBy       = "/api/v1/statuses/:id/reblogged_by"
 pFavoritedBy       = "/api/v1/statuses/:id/favourited_by"
 pStatuses          = "/api/v1/statuses"
@@ -149,6 +155,28 @@ instance FromJSON Attachment where
                <*> (v .:  T.pack "remote_url")
                <*> (v .:  T.pack "preview_url")
                <*> (v .:? T.pack "text_url")
+
+data Card = Card {
+  cardUrl :: String,
+  cardTitle :: String,
+  cardDescription :: String,
+  cardImage :: String
+} deriving (Show)
+instance FromJSON Card where
+  parseJSON (Object v) =
+    Card <$> (v .: T.pack "url")
+         <*> (v .: T.pack "title")
+         <*> (v .: T.pack "description")
+         <*> (v .: T.pack "image")
+
+data Context = Context {
+  contextAncestors :: [Status],
+  contextDescendants :: [Status]
+} deriving (Show)
+instance FromJSON Context where
+  parseJSON (Object v) =
+    Context <$> (v .: T.pack "ancestors")
+            <*> (v .: T.pack "descendants")
 
 data Instance = Instance {
   instanceUri :: String,
@@ -443,6 +471,21 @@ getSearchedResults :: String -> HastodonClient -> IO (Either JSONException [Resu
 getSearchedResults query client = do
   res <- getHastodonResponseJSON (pSearch ++ "?q=" ++ query) client
   return (getResponseBody res :: Either JSONException [Results])
+
+getStatus :: Int -> HastodonClient -> IO (Either JSONException Status)
+getStatus id client = do
+  res <- getHastodonResponseJSON (replace ":id" (show id) pStatus) client
+  return (getResponseBody res :: Either JSONException Status)
+
+getCard :: Int -> HastodonClient -> IO (Either JSONException Card)
+getCard id client = do
+  res <- getHastodonResponseJSON (replace ":id" (show id) pCard) client
+  return (getResponseBody res :: Either JSONException Card)
+
+getContext :: Int -> HastodonClient -> IO (Either JSONException Context)
+getContext id client = do
+  res <- getHastodonResponseJSON (replace ":id" (show id) pContext) client
+  return (getResponseBody res :: Either JSONException Context)
 
 getRebloggedBy :: Int -> HastodonClient -> IO (Either JSONException [Account])
 getRebloggedBy id client = do

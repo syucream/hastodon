@@ -53,9 +53,9 @@ main = do
 - [ ]  GET /api/v1/reports
 - [ ]  POST /api/v1/reports
 - [x]  GET /api/v1/search
-- [ ]  GET /api/v1/statuses/:id
-- [ ]  GET /api/v1/statuses/:id/context
-- [ ]  GET /api/v1/statuses/:id/card
+- [x]  GET /api/v1/statuses/:id
+- [x]  GET /api/v1/statuses/:id/context
+- [x]  GET /api/v1/statuses/:id/card
 - [x]  GET /api/v1/statuses/:id/reblogged_by
 - [x]  GET /api/v1/statuses/:id/favourited_by
 - [x]  POST /api/v1/statuses
