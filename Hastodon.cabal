@@ -6,6 +6,7 @@ Description: mastodon client module for Haskell
 Author: Ryo Okubo
 Maintainer: syucream1031@gmail.com
 Homepage: https://github.com/syucream/hastodon
+cabal-version: >= 1.10
 
 License: MIT
 license-file: LICENSE
@@ -18,7 +19,7 @@ Source-repository head
 
 Library
   default-language: Haskell2010
-  Build-Depends: base,
+  Build-Depends: base >= 4.5 && < 5,
                  aeson,
                  bytestring,
                  http-types,
