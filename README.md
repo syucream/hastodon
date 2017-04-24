@@ -13,8 +13,8 @@ main :: IO ()
 main = do
   let token = "your OAuth token"
   let client = mkHastodonClient "mastodon.social" token
-  tl <- getPublicTimeline client
-  print body
+  timeline <- getPublicTimeline client
+  print timeline
   result <- postStatus "test toot from hastodon!" client
   print result 
 ```
