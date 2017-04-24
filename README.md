@@ -41,8 +41,8 @@ main = do
 - [x]  GET /api/v1/blocks
 - [x]  GET /api/v1/favourites
 - [x]  GET /api/v1/follow_requests
-- [ ]  POST /api/v1/follow_requests/:id/authorize
-- [ ]  POST /api/v1/follow_requests/:id/reject
+- [x]  POST /api/v1/follow_requests/:id/authorize
+- [x]  POST /api/v1/follow_requests/:id/reject
 - [ ]  POST /api/v1/follows
 - [x]  GET /api/v1/instance
 - [ ]  POST /api/v1/media
@@ -50,7 +50,7 @@ main = do
 - [x]  GET /api/v1/notifications
 - [x]  GET /api/v1/notifications/:id
 - [x]  POST /api/v1/notifications/clear
-- [ ]  GET /api/v1/reports
+- [x]  GET /api/v1/reports
 - [ ]  POST /api/v1/reports
 - [x]  GET /api/v1/search
 - [x]  GET /api/v1/statuses/:id

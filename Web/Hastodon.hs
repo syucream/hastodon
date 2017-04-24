@@ -19,11 +19,14 @@ module Web.Hastodon
   , getBlocks
   , getFavorites
   , getFollowRequests
+  , postAuthorizeRequest
+  , postRejectRequest
   , getInstance
   , getMutes
   , getNotifications
   , getNotificationById
   , postNotificationsClear
+  , getReports
   , getSearchedResults
   , getStatus
   , getCard
@@ -69,11 +72,14 @@ pApps              = "/api/v1/apps"
 pBlocks            = "/api/v1/blocks"
 pFavorites         = "/api/v1/favourites"
 pFollowRequests    = "/api/v1/follow_requests"
+pAuthorizeRequest  = "/api/v1/follow_requests/:id/authorize"
+pRejectRequest     = "/api/v1/follow_requests/:id/reject"
 pInstance          = "/api/v1/instance"
 pMutes             = "/api/v1/mutes"
 pNotifications     = "/api/v1/notifications"
 pNotificationById  = "/api/v1/notifications/:id"
 pNotificationClear = "/api/v1/notifications/clear"
+pReports           = "/api/v1/reports"
 pSearch            = "/api/v1/search"
 pStatus            = "/api/v1/statuses/:id"
 pContext           = "/api/v1/statuses/:id/context"
@@ -248,6 +254,15 @@ instance FromJSON Relationship where
                  <*> (v .: T.pack "blocking")
                  <*> (v .: T.pack "muting")
                  <*> (v .: T.pack "requested")
+
+data Report = Report {
+  reportId :: Int,
+  reportActionToken :: String
+} deriving (Show)
+instance FromJSON Report where
+  parseJSON (Object v) =
+    Report <$> (v .: T.pack "id")
+           <*> (v .: T.pack "action_taken")
 
 data Results = Results {
   resultAccounts :: [Account],
@@ -444,6 +459,12 @@ getFollowRequests client = do
   res <- getHastodonResponseJSON pFollowRequests client
   return (getResponseBody res :: Either JSONException [Account])
 
+postAuthorizeRequest :: Int -> HastodonClient -> IO Bool
+postAuthorizeRequest id = postAndGetHastodonResult (replace ":id" (show id) pAuthorizeRequest) []
+
+postRejectRequest :: Int -> HastodonClient -> IO Bool
+postRejectRequest id = postAndGetHastodonResult (replace ":id" (show id) pRejectRequest) []
+
 getInstance :: HastodonClient -> IO (Either JSONException Instance)
 getInstance client = do
   res <- getHastodonResponseJSON pInstance client
@@ -466,6 +487,11 @@ getNotificationById id client = do
 
 postNotificationsClear :: HastodonClient -> IO Bool
 postNotificationsClear = postAndGetHastodonResult pNotificationClear []
+
+getReports :: HastodonClient -> IO (Either JSONException [Report])
+getReports client = do
+  res <- getHastodonResponseJSON pReports client
+  return (getResponseBody res :: Either JSONException [Report])
 
 getSearchedResults :: String -> HastodonClient -> IO (Either JSONException [Results])
 getSearchedResults query client = do
