@@ -12,12 +12,17 @@ import Web.Hastodon
 
 main :: IO ()
 main = do
-  let token = "your OAuth token"
-  let client = mkHastodonClient "mastodon.social" token
-  timeline <- getPublicTimeline client
-  print timeline
-  result <- postStatus "test toot from hastodon!" client
-  print result 
+  let clientId = "???"
+  let clientSecret = "???"
+  let username = "???"
+  let password = "???"
+  maybeClient <- mkHastodonClient clientId clientSecret username password "mastodon.social"
+  case maybeClient of
+    Just client -> do
+      timeline <- getAccountById 93150 client
+      print timeline
+      result <- postStatus "test toot from hastodon!" client
+      print result
 ```
 
 ## Status of implementations
