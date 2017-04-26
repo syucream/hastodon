@@ -71,7 +71,7 @@ main = do
 
 ### Auth
 
-- TBD
+- [x] the interface of POST /oauth/token
 
 ## License
 

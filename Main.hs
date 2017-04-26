@@ -5,9 +5,14 @@ import Web.Hastodon
 --
 main :: IO ()
 main = do
-  let token = "???"
-  let client = mkHastodonClient "pawoo.net" token
-  tl <- getHomeTimeline client
-  -- tl <- getPublicTimeline client
-  print tl
-
+  let clientId = "???"
+  let clientSecret = "???"
+  let username = "???"
+  let password = "???"
+  maybeClient <- mkHastodonClient clientId clientSecret username password "mastodon.social"
+  case maybeClient of
+    Just client -> do
+      timeline <- getAccountById 93150 client
+      print timeline
+      result <- postStatus "test toot from hastodon!" client
+      print result

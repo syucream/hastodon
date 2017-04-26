@@ -101,6 +101,14 @@ data HastodonClient = HastodonClient {
   token :: String
 }
 
+data OAuthResponse = OAuthResponse {
+  accessToken :: String
+  -- NOTE currently ignore other fields.
+} deriving (Show)
+instance FromJSON OAuthResponse where
+  parseJSON (Object v) =
+    OAuthResponse <$> (v .: T.pack "access_token")
+
 data Account = Account {
   accountId :: Int,
   accountUsername :: String,
@@ -333,6 +341,19 @@ instance FromJSON Tag where
 -- helpers
 -- 
 
+getOAuthToken :: String -> String -> String -> String -> String -> IO (Either JSONException OAuthResponse)
+getOAuthToken clientId clientSecret username password host = do
+  initReq <- parseRequest $ "https://" ++ host ++ "/oauth/token"
+  let reqBody = [(Char8.pack "client_id", Char8.pack clientId),
+                 (Char8.pack "client_secret", Char8.pack clientSecret),
+                 (Char8.pack "username", Char8.pack username),
+                 (Char8.pack "password", Char8.pack password),
+                 (Char8.pack "grant_type", Char8.pack "password"),
+                 (Char8.pack "scope", Char8.pack "read write follow")]
+  let req = setRequestBodyURLEncoded reqBody $ initReq
+  res <- httpJSONEither req
+  return $ (getResponseBody res :: Either JSONException OAuthResponse)
+
 mkHastodonHeader :: String -> Request -> Request
 mkHastodonHeader token =
   addRequestHeader hAuthorization $ Char8.pack $ "Bearer " ++ token
@@ -365,8 +386,12 @@ postAndGetHastodonResponseJSON path body client = do
 -- exported functions
 -- 
 
-mkHastodonClient :: String -> String -> HastodonClient
-mkHastodonClient host token = HastodonClient host token
+mkHastodonClient :: String -> String -> String -> String -> String -> IO (Maybe HastodonClient)
+mkHastodonClient clientId clientSecret username password host = do
+  oauthRes <- getOAuthToken clientId clientSecret username password host
+  case oauthRes of
+    Left err -> return $ Nothing
+    Right oauthData -> return $ Just $ HastodonClient host (accessToken oauthData)
 
 getAccountById :: Int -> HastodonClient -> IO (Either JSONException Account)
 getAccountById id client = do
