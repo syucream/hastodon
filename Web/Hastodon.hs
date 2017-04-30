@@ -1,7 +1,21 @@
 module Web.Hastodon
   (
-    mkHastodonClient
+    Account(..)
+  , Application(..)
+  , Attachment(..)
+  , Card(..)
+  , Context(..)
+  , Instance(..)
+  , Mention(..)
+  , Notification(..)
+  , OAuthClient(..)
+  , Relationship(..)
+  , Report(..)
+  , Results(..)
+  , Status(..)
+  , Tag(..)
 
+  , mkHastodonClient
   , getAccountById
   , getCurrentAccount
   , getFollowers
