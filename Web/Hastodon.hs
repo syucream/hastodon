@@ -475,12 +475,14 @@ postUnmute id client = do
   res <- postAndGetHastodonResponseJSON (replace ":id" (show id) pUnmute) [] client
   return (getResponseBody res :: Either JSONException Relationship)
 
-postApps :: String -> HastodonClient -> IO (Either JSONException OAuthClient)
-postApps clientName client = do
+postApps :: String -> String -> IO (Either JSONException OAuthClient)
+postApps host clientName = do
   let reqBody = [(Char8.pack "client_name", Char8.pack clientName),
                  (Char8.pack "redirect_uris", Char8.pack "urn:ietf:wg:oauth:2.0:oob"),
                  (Char8.pack "scopes", Char8.pack "read write follow")]
-  res <- postAndGetHastodonResponseJSON pApps reqBody client
+  initReq <- parseRequest $ "https://" ++ host ++ pApps
+  let req = setRequestBodyURLEncoded reqBody $ initReq
+  res <- httpJSONEither req
   return (getResponseBody res :: Either JSONException OAuthClient)
 
 getBlocks :: HastodonClient -> IO (Either JSONException [Account])

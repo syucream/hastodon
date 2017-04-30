@@ -7,6 +7,19 @@ mastodon client module for Haskell
 
 ## Quickstart
 
+If you don't have client id and client secret, call postApps at first.
+
+```haskell
+import Web.Hastodon
+  appRes <- postApps "mastodon.social" "HastodonClientApp"
+    case appRes of
+      Right app -> do
+        let clientId = oauthClientClientId app
+        let clientSecret = oauthClientClientSecret app
+```
+
+Fill client id, client secret, your username and password, then call functions.
+
 ```haskell
 import Web.Hastodon
 
