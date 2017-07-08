@@ -1,6 +1,8 @@
 module Web.Hastodon
   (
-    Account(..)
+    HastodonClient
+
+  , Account(..)
   , Application(..)
   , Attachment(..)
   , Card(..)
