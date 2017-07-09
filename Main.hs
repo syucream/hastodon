@@ -12,7 +12,7 @@ main = do
   maybeClient <- mkHastodonClient clientId clientSecret username password "mastodon.social"
   case maybeClient of
     Just client -> do
-      timeline <- getAccountById 93150 client
+      timeline <- getAccountById client 93150 
       print timeline
-      result <- postStatus "test toot from hastodon!" client
+      result <- postStatus client "test toot from hastodon!" 
       print result
