@@ -409,8 +409,8 @@ mkHastodonClient clientId clientSecret username password host = do
     Left err -> return $ Nothing
     Right oauthData -> return $ Just $ HastodonClient host (accessToken oauthData)
 
-getAccountById :: Int -> HastodonClient -> IO (Either JSONException Account)
-getAccountById id client = do
+getAccountById :: HastodonClient -> Int -> IO (Either JSONException Account)
+getAccountById client id = do
   res <- getHastodonResponseJSON (replace ":id" (show id) pAccountById) client
   return (getResponseBody res :: Either JSONException Account)
 
@@ -420,60 +420,60 @@ getCurrentAccount client = do
   return (getResponseBody res :: Either JSONException Account)
 
 -- TODO support options
-getFollowers :: Int -> HastodonClient -> IO (Either JSONException [Account])
-getFollowers id client = do
+getFollowers :: HastodonClient -> Int -> IO (Either JSONException [Account])
+getFollowers client id = do
   res <- getHastodonResponseJSON (replace ":id" (show id) pFollowers) client
   return (getResponseBody res :: Either JSONException [Account])
 
-getFollowing :: Int -> HastodonClient -> IO (Either JSONException [Account])
-getFollowing id client = do
+getFollowing :: HastodonClient -> Int -> IO (Either JSONException [Account])
+getFollowing client id = do
   res <- getHastodonResponseJSON (replace ":id" (show id) pFollowing) client
   return (getResponseBody res :: Either JSONException [Account])
 
-getAccountStatuses :: Int -> HastodonClient -> IO (Either JSONException [Status])
-getAccountStatuses id client = do
+getAccountStatuses :: HastodonClient -> Int -> IO (Either JSONException [Status])
+getAccountStatuses client id = do
   res <- getHastodonResponseJSON (replace ":id" (show id) pAccountStatuses) client
   return (getResponseBody res :: Either JSONException [Status])
 
-getRelationships :: [Int] -> HastodonClient -> IO (Either JSONException [Relationship])
-getRelationships ids client = do
+getRelationships :: HastodonClient -> [Int] ->  IO (Either JSONException [Relationship])
+getRelationships client ids = do
   let intIds = map (show) ids
   let params = foldl (\x y -> x ++ (if x == "" then "?" else "&") ++ "id%5b%5d=" ++ y) "" intIds
   res <- getHastodonResponseJSON (pRelationships ++ params) client
   return (getResponseBody res :: Either JSONException [Relationship])
 
-getSearchedAccounts :: String -> HastodonClient -> IO (Either JSONException [Account])
-getSearchedAccounts query client = do
+getSearchedAccounts :: HastodonClient -> String ->  IO (Either JSONException [Account])
+getSearchedAccounts client query = do
   res <- getHastodonResponseJSON (pSearchAccounts ++ "?q=" ++ query) client
   return (getResponseBody res :: Either JSONException [Account])
 
-postFollow :: Int -> HastodonClient -> IO (Either JSONException Relationship)
-postFollow id client = do
+postFollow :: HastodonClient -> Int ->  IO (Either JSONException Relationship)
+postFollow client id = do
   res <- postAndGetHastodonResponseJSON (replace ":id" (show id) pFollow) [] client
   return (getResponseBody res :: Either JSONException Relationship)
 
-postUnfollow :: Int -> HastodonClient -> IO (Either JSONException Relationship)
-postUnfollow id client = do
+postUnfollow :: HastodonClient -> Int ->  IO (Either JSONException Relationship)
+postUnfollow client id = do
   res <- postAndGetHastodonResponseJSON (replace ":id" (show id) pUnfollow) [] client
   return (getResponseBody res :: Either JSONException Relationship)
 
-postBlock :: Int -> HastodonClient -> IO (Either JSONException Relationship)
-postBlock id client = do
+postBlock :: HastodonClient -> Int ->  IO (Either JSONException Relationship)
+postBlock client id = do
   res <- postAndGetHastodonResponseJSON (replace ":id" (show id) pBlock) [] client
   return (getResponseBody res :: Either JSONException Relationship)
 
-postUnblock :: Int -> HastodonClient -> IO (Either JSONException Relationship)
-postUnblock id client = do
+postUnblock :: HastodonClient -> Int ->  IO (Either JSONException Relationship)
+postUnblock client id = do
   res <- postAndGetHastodonResponseJSON (replace ":id" (show id) pUnblock) [] client
   return (getResponseBody res :: Either JSONException Relationship)
 
-postMute :: Int -> HastodonClient -> IO (Either JSONException Relationship)
-postMute id client = do
+postMute :: HastodonClient -> Int ->  IO (Either JSONException Relationship)
+postMute client id = do
   res <- postAndGetHastodonResponseJSON (replace ":id" (show id) pMute) [] client
   return (getResponseBody res :: Either JSONException Relationship)
 
-postUnmute :: Int -> HastodonClient -> IO (Either JSONException Relationship)
-postUnmute id client = do
+postUnmute :: HastodonClient -> Int ->  IO (Either JSONException Relationship)
+postUnmute client id = do
   res <- postAndGetHastodonResponseJSON (replace ":id" (show id) pUnmute) [] client
   return (getResponseBody res :: Either JSONException Relationship)
 
@@ -502,11 +502,11 @@ getFollowRequests client = do
   res <- getHastodonResponseJSON pFollowRequests client
   return (getResponseBody res :: Either JSONException [Account])
 
-postAuthorizeRequest :: Int -> HastodonClient -> IO Bool
-postAuthorizeRequest id = postAndGetHastodonResult (replace ":id" (show id) pAuthorizeRequest) []
+postAuthorizeRequest :: HastodonClient -> Int ->  IO Bool
+postAuthorizeRequest client id = postAndGetHastodonResult (replace ":id" (show id) pAuthorizeRequest) [] client
 
-postRejectRequest :: Int -> HastodonClient -> IO Bool
-postRejectRequest id = postAndGetHastodonResult (replace ":id" (show id) pRejectRequest) []
+postRejectRequest :: HastodonClient -> Int ->  IO Bool
+postRejectRequest client id = postAndGetHastodonResult (replace ":id" (show id) pRejectRequest) [] client
 
 getInstance :: HastodonClient -> IO (Either JSONException Instance)
 getInstance client = do
@@ -523,8 +523,8 @@ getNotifications client = do
   res <- getHastodonResponseJSON pNotifications client
   return (getResponseBody res :: Either JSONException [Notification])
 
-getNotificationById :: Int -> HastodonClient -> IO (Either JSONException Notification)
-getNotificationById id client = do
+getNotificationById :: HastodonClient -> Int ->  IO (Either JSONException Notification)
+getNotificationById client id = do
   res <- getHastodonResponseJSON (replace ":id" (show id) pNotificationById) client
   return (getResponseBody res :: Either JSONException Notification)
 
@@ -536,58 +536,58 @@ getReports client = do
   res <- getHastodonResponseJSON pReports client
   return (getResponseBody res :: Either JSONException [Report])
 
-getSearchedResults :: String -> HastodonClient -> IO (Either JSONException [Results])
-getSearchedResults query client = do
+getSearchedResults :: HastodonClient -> String ->  IO (Either JSONException [Results])
+getSearchedResults client query = do
   res <- getHastodonResponseJSON (pSearch ++ "?q=" ++ query) client
   return (getResponseBody res :: Either JSONException [Results])
 
-getStatus :: Int -> HastodonClient -> IO (Either JSONException Status)
-getStatus id client = do
+getStatus :: HastodonClient -> Int ->  IO (Either JSONException Status)
+getStatus client id = do
   res <- getHastodonResponseJSON (replace ":id" (show id) pStatus) client
   return (getResponseBody res :: Either JSONException Status)
 
-getCard :: Int -> HastodonClient -> IO (Either JSONException Card)
-getCard id client = do
+getCard :: HastodonClient -> Int ->  IO (Either JSONException Card)
+getCard client id = do
   res <- getHastodonResponseJSON (replace ":id" (show id) pCard) client
   return (getResponseBody res :: Either JSONException Card)
 
-getContext :: Int -> HastodonClient -> IO (Either JSONException Context)
-getContext id client = do
+getContext :: HastodonClient -> Int ->  IO (Either JSONException Context)
+getContext client id = do
   res <- getHastodonResponseJSON (replace ":id" (show id) pContext) client
   return (getResponseBody res :: Either JSONException Context)
 
-getRebloggedBy :: Int -> HastodonClient -> IO (Either JSONException [Account])
-getRebloggedBy id client = do
+getRebloggedBy :: HastodonClient -> Int ->  IO (Either JSONException [Account])
+getRebloggedBy client id = do
   res <- getHastodonResponseJSON (replace ":id" (show id) pRebloggedBy) client
   return (getResponseBody res :: Either JSONException [Account])
 
-getFavoritedBy :: Int -> HastodonClient -> IO (Either JSONException [Account])
-getFavoritedBy id client = do
+getFavoritedBy :: HastodonClient -> Int ->  IO (Either JSONException [Account])
+getFavoritedBy client id = do
   res <- getHastodonResponseJSON (replace ":id" (show id) pFavoritedBy) client
   return (getResponseBody res :: Either JSONException [Account])
 
-postStatus :: String -> HastodonClient -> IO (Either JSONException Status)
-postStatus status client = do
+postStatus :: HastodonClient -> String ->  IO (Either JSONException Status)
+postStatus client status = do
   res <- postAndGetHastodonResponseJSON pStatuses [(Char8.pack "status", Char8.pack status)] client
   return (getResponseBody res :: Either JSONException Status)
 
-postReblog :: Int -> HastodonClient -> IO (Either JSONException Status)
-postReblog id client = do
+postReblog :: HastodonClient -> Int ->  IO (Either JSONException Status)
+postReblog client id = do
   res <- postAndGetHastodonResponseJSON (replace ":id" (show id) pReblog) [] client
   return (getResponseBody res :: Either JSONException Status)
 
-postUnreblog :: Int -> HastodonClient -> IO (Either JSONException Status)
-postUnreblog id client = do
+postUnreblog :: HastodonClient -> Int ->  IO (Either JSONException Status)
+postUnreblog client id = do
   res <- postAndGetHastodonResponseJSON (replace ":id" (show id) pUnreblog) [] client
   return (getResponseBody res :: Either JSONException Status)
 
-postFavorite :: Int -> HastodonClient -> IO (Either JSONException Status)
-postFavorite id client = do
+postFavorite :: HastodonClient -> Int ->  IO (Either JSONException Status)
+postFavorite client id = do
   res <- postAndGetHastodonResponseJSON (replace ":id" (show id) pFavorite) [] client
   return (getResponseBody res :: Either JSONException Status)
 
-postUnfavorite :: Int -> HastodonClient -> IO (Either JSONException Status)
-postUnfavorite id client = do
+postUnfavorite :: HastodonClient -> Int ->  IO (Either JSONException Status)
+postUnfavorite client id = do
   res <- postAndGetHastodonResponseJSON (replace ":id" (show id) pUnfavorite) [] client
   return (getResponseBody res :: Either JSONException Status)
 
@@ -601,7 +601,7 @@ getPublicTimeline client = do
   res <- getHastodonResponseJSON pPublicTimeline client
   return (getResponseBody res :: Either JSONException [Status])
 
-getTaggedTimeline :: String -> HastodonClient -> IO (Either JSONException [Status])
-getTaggedTimeline hashtag client = do
+getTaggedTimeline :: HastodonClient -> String ->  IO (Either JSONException [Status])
+getTaggedTimeline client hashtag = do
   res <- getHastodonResponseJSON (replace ":hashtag" hashtag pTaggedTimeline) client
   return (getResponseBody res :: Either JSONException [Status])
