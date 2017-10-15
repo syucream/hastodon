@@ -64,9 +64,16 @@ import Data.Aeson
 import qualified Data.ByteString.Char8 as Char8
 import qualified Data.ByteString.Lazy.Char8 as LChar8
 import qualified Data.Text as T
+import qualified Data.Text.Encoding as T
 import Data.String.Utils
 import Network.HTTP.Simple
 import Network.HTTP.Types.Header
+
+--
+-- Utility
+--
+utf8ToChar8 :: String -> Char8.ByteString
+utf8ToChar8 = T.encodeUtf8 . T.pack
 
 --
 -- Mastodon API endpoints
@@ -360,10 +367,10 @@ instance FromJSON Tag where
 getOAuthToken :: String -> String -> String -> String -> String -> IO (Either JSONException OAuthResponse)
 getOAuthToken clientId clientSecret username password host = do
   initReq <- parseRequest $ "https://" ++ host ++ "/oauth/token"
-  let reqBody = [(Char8.pack "client_id", Char8.pack clientId),
-                 (Char8.pack "client_secret", Char8.pack clientSecret),
-                 (Char8.pack "username", Char8.pack username),
-                 (Char8.pack "password", Char8.pack password),
+  let reqBody = [(Char8.pack "client_id", utf8ToChar8 clientId),
+                 (Char8.pack "client_secret", utf8ToChar8 clientSecret),
+                 (Char8.pack "username", utf8ToChar8 username),
+                 (Char8.pack "password", utf8ToChar8 password),
                  (Char8.pack "grant_type", Char8.pack "password"),
                  (Char8.pack "scope", Char8.pack "read write follow")]
   let req = setRequestBodyURLEncoded reqBody $ initReq
@@ -372,7 +379,7 @@ getOAuthToken clientId clientSecret username password host = do
 
 mkHastodonHeader :: String -> Request -> Request
 mkHastodonHeader token =
-  addRequestHeader hAuthorization $ Char8.pack $ "Bearer " ++ token
+  addRequestHeader hAuthorization $ utf8ToChar8 $ "Bearer " ++ token
 
 mkHastodonRequest :: String -> HastodonClient -> IO Request
 mkHastodonRequest path client = do
@@ -479,7 +486,7 @@ postUnmute client id = do
 
 postApps :: String -> String -> IO (Either JSONException OAuthClient)
 postApps host clientName = do
-  let reqBody = [(Char8.pack "client_name", Char8.pack clientName),
+  let reqBody = [(Char8.pack "client_name", utf8ToChar8 clientName),
                  (Char8.pack "redirect_uris", Char8.pack "urn:ietf:wg:oauth:2.0:oob"),
                  (Char8.pack "scopes", Char8.pack "read write follow")]
   initReq <- parseRequest $ "https://" ++ host ++ pApps
@@ -568,7 +575,7 @@ getFavoritedBy client id = do
 
 postStatus :: HastodonClient -> String ->  IO (Either JSONException Status)
 postStatus client status = do
-  res <- postAndGetHastodonResponseJSON pStatuses [(Char8.pack "status", Char8.pack status)] client
+  res <- postAndGetHastodonResponseJSON pStatuses [(Char8.pack "status", utf8ToChar8 status)] client
   return (getResponseBody res :: Either JSONException Status)
 
 postReblog :: HastodonClient -> Int ->  IO (Either JSONException Status)
