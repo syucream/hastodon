@@ -98,3 +98,8 @@ MIT
 ## Author
 
 Ryo Okubo <syucream1031@gmail.com>
+
+### Contributors
+
+* [KirinDave](https://github.com/KirinDave)
+* [as-capabl](https://github.com/as-capabl)
