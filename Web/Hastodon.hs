@@ -332,7 +332,7 @@ instance FromJSON Status where
   parseJSON (Object v) =
     Status <$> (v .:  T.pack "id")
            <*> (v .:  T.pack "uri")
-           <*> (v .:  T.pack "url")
+           <*> (maybe "" id <$> (v .:?  T.pack "url"))
            <*> (v .:  T.pack "account")
            <*> (v .:? T.pack "in_reply_to_id")
            <*> (v .:? T.pack "in_reply_to_account_id")
