@@ -119,6 +119,8 @@ pFavorite          = "/api/v1/statuses/:id/favourite"
 pUnfavorite        = "/api/v1/statuses/:id/unfavourite"
 pTaggedTimeline    = "/api/v1/timelines/tag/:hashtag"
 
+type HastodonId = String
+
 data HastodonClient = HastodonClient {
   host :: String,
   token :: String
@@ -133,7 +135,7 @@ instance FromJSON OAuthResponse where
     OAuthResponse <$> (v .: T.pack "access_token")
 
 data Account = Account {
-  accountId :: Int,
+  accountId :: HastodonId,
   accountUsername :: String,
   accountAcct :: String,
   accountDisplayName :: String,
@@ -177,7 +179,7 @@ instance FromJSON Application where
                 <*> (v .:? T.pack "website")
 
 data Attachment = Attachment {
-  attachmentId :: Int,
+  attachmentId :: HastodonId,
   attachmentType :: String,
   attachmentUrl :: String,
   attachmentRemoteUrl :: String,
@@ -232,7 +234,7 @@ data Mention = Mention {
   mentionUrl :: String,
   mentionUsername :: String,
   mentionAcct :: String,
-  mentionId :: Int
+  mentionId :: HastodonId
 } deriving (Show)
 instance FromJSON Mention where
   parseJSON (Object v) =
@@ -242,7 +244,7 @@ instance FromJSON Mention where
             <*> (v .: T.pack "id")
 
 data Notification = Notification {
-  notificationId :: Int,
+  notificationId :: HastodonId,
   notificationType :: String,
   notificationCreatedAt :: String,
   notificationAccount :: Account,
@@ -257,7 +259,7 @@ instance FromJSON Notification where
                  <*> (v .:? T.pack "status")
 
 data OAuthClient = OAuthClient {
-  oauthClientId :: Int,
+  oauthClientId :: HastodonId,
   oauthClientRedirectUri :: String,
   oauthClientClientId :: String,
   oauthClientClientSecret :: String
@@ -270,7 +272,7 @@ instance FromJSON OAuthClient where
                 <*> (v .: T.pack "client_secret")
 
 data Relationship = Relationship {
-  relationshipId :: Int,
+  relationshipId :: HastodonId,
   relationshipFollowing :: Bool,
   relationshipFollowed_by :: Bool,
   relationshipBlocking :: Bool,
@@ -287,7 +289,7 @@ instance FromJSON Relationship where
                  <*> (v .: T.pack "requested")
 
 data Report = Report {
-  reportId :: Int,
+  reportId :: HastodonId,
   reportActionToken :: String
 } deriving (Show)
 instance FromJSON Report where
@@ -307,7 +309,7 @@ instance FromJSON Results where
             <*> (v .: T.pack "hashtags")
 
 data Status = Status {
-  statusId :: Int,
+  statusId :: HastodonId,
   statusUri :: String,
   statusUrl :: String,
   statusAccount :: Account,
