@@ -1,5 +1,5 @@
 Name: Hastodon
-Version: 0.3.0
+Version: 0.3.1
 Synopsis: mastodon client module for Haskell
 Category: Web
 Description: mastodon client module for Haskell
@@ -22,7 +22,9 @@ Library
   Build-Depends: base >= 4.5 && < 5,
                  aeson,
                  bytestring,
+                 mime-types,
                  http-types,
+                 http-client,
                  http-conduit,
                  MissingH,
                  text
