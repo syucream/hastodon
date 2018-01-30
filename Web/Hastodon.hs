@@ -38,6 +38,7 @@ module Web.Hastodon
   , postAuthorizeRequest
   , postRejectRequest
   , getInstance
+  , postMediaFile
   , getMutes
   , getNotifications
   , getNotificationById
@@ -50,6 +51,7 @@ module Web.Hastodon
   , getRebloggedBy
   , getFavoritedBy
   , postStatus
+  , postStatusWithMediaIds
   , postReblog
   , postUnreblog
   , postFavorite
@@ -68,6 +70,8 @@ import qualified Data.Text.Encoding as T
 import Data.String.Utils
 import Network.HTTP.Simple
 import Network.HTTP.Types.Header
+import Network.HTTP.Client.MultipartFormData
+import Network.Mime
 
 --
 -- Utility
@@ -98,6 +102,7 @@ pFollowRequests    = "/api/v1/follow_requests"
 pAuthorizeRequest  = "/api/v1/follow_requests/:id/authorize"
 pRejectRequest     = "/api/v1/follow_requests/:id/reject"
 pInstance          = "/api/v1/instance"
+pMedia             = "/api/v1/media"
 pMutes             = "/api/v1/mutes"
 pNotifications     = "/api/v1/notifications"
 pNotificationById  = "/api/v1/notifications/:id"
@@ -182,7 +187,7 @@ data Attachment = Attachment {
   attachmentId :: HastodonId,
   attachmentType :: String,
   attachmentUrl :: String,
-  attachmentRemoteUrl :: String,
+  attachmentRemoteUrl :: Maybe String,
   attachmentPreviewUrl :: String,
   attachmentTextUrl :: Maybe String
 } deriving (Show)
@@ -191,7 +196,7 @@ instance FromJSON Attachment where
     Attachment <$> (v .:  T.pack "id")
                <*> (v .:  T.pack "type")
                <*> (v .:  T.pack "url")
-               <*> (v .:  T.pack "remote_url")
+               <*> (v .:? T.pack "remote_url")
                <*> (v .:  T.pack "preview_url")
                <*> (v .:? T.pack "text_url")
 
@@ -361,7 +366,6 @@ instance FromJSON Tag where
   parseJSON (Object v) =
     Tag <$> (v .: T.pack "name")
         <*> (v .: T.pack "url")
-
 -- 
 -- helpers
 -- 
@@ -522,6 +526,17 @@ getInstance client = do
   res <- getHastodonResponseJSON pInstance client
   return (getResponseBody res :: Either JSONException Instance)
 
+postMediaFile :: HastodonClient -> String -> String -> IO (Either JSONException Attachment)
+postMediaFile client filename description = do
+  initReq <- mkHastodonRequest pMedia client
+  let file = partFileSource (T.pack "file") filename
+  let mimetype = defaultMimeLookup (T.pack filename)
+  req <- formDataBody [file { partContentType = Just mimetype },
+                       partBS (T.pack "description") (utf8ToChar8 description)
+                      ] initReq
+  res <- httpJSONEither req
+  return (getResponseBody res :: Either JSONException Attachment)
+
 getMutes :: HastodonClient -> IO (Either JSONException [Account])
 getMutes client = do
   res <- getHastodonResponseJSON pMutes client
@@ -578,6 +593,13 @@ getFavoritedBy client id = do
 postStatus :: HastodonClient -> String ->  IO (Either JSONException Status)
 postStatus client status = do
   res <- postAndGetHastodonResponseJSON pStatuses [(Char8.pack "status", utf8ToChar8 status)] client
+  return (getResponseBody res :: Either JSONException Status)
+
+postStatusWithMediaIds :: HastodonClient -> String -> [HastodonId] -> IO (Either JSONException Status)
+postStatusWithMediaIds client status mediaIds = do
+  let unpackedMediaIds = [(Char8.pack "media_ids[]",utf8ToChar8 media)|media <- mediaIds] -- Rails array parameter convention?
+  let body = (Char8.pack "status",utf8ToChar8 status):unpackedMediaIds
+  res <- postAndGetHastodonResponseJSON pStatuses body client
   return (getResponseBody res :: Either JSONException Status)
 
 postReblog :: HastodonClient -> Int ->  IO (Either JSONException Status)
