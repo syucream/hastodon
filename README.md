@@ -7,7 +7,7 @@ mastodon client module for Haskell
 
 ## Quickstart
 
-If you don't have client id and client secret, call postApps at first.
+If you don't have client id and client secret, call postApps at first. (Alternatively, in the web client, under the development section of your mastodon profile settings, 
 
 ```haskell
 import Web.Hastodon
@@ -18,7 +18,7 @@ import Web.Hastodon
         let clientSecret = oauthClientClientSecret app
 ```
 
-Fill client id, client secret, your username and password, then call functions.
+Fill client id, client secret, the email address used to sign up for the instance and password, then call functions.
 
 ```haskell
 import Web.Hastodon
@@ -27,15 +27,17 @@ main :: IO ()
 main = do
   let clientId = "???"
   let clientSecret = "???"
-  let username = "???"
+  let email = "???"
   let password = "???"
-  maybeClient <- mkHastodonClient clientId clientSecret username password "mastodon.social"
+  maybeClient <- mkHastodonClient clientId clientSecret email password "mastodon.social"
   case maybeClient of
     Just client -> do
-      timeline <- getAccountById 93150 client
+      timeline <- getAccountById client 93150
       print timeline
-      result <- postStatus "test toot from hastodon!" client
+      result <- postStatus client "test toot from hastodon!"
       print result
+    Nothing -> do
+      putStrLn "Failed to log in.  Be careful regarding the spelling of your email and password."
 ```
 
 ## Status of implementations
