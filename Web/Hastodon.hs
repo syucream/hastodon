@@ -1,6 +1,6 @@
 module Web.Hastodon
   (
-    HastodonClient
+    HastodonClient(..)
 
   , Account(..)
   , Application(..)
