@@ -106,3 +106,4 @@ Ryo Okubo <syucream1031@gmail.com>
 * [KirinDave](https://github.com/KirinDave)
 * [as-capabl](https://github.com/as-capabl)
 * [william42](https://github.com/william42)
+* [swizzard](https://github.com/swizzard)
