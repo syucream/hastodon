@@ -2,7 +2,7 @@
 {-# LANGUAGE RankNTypes #-}
 
 module Web.Hastodon.Streaming
-  ( StreamingPayload
+  ( StreamingPayload(..)
   , StreamingResponse
   , streamUser
   , streamPublic
@@ -16,7 +16,6 @@ import           Data.Aeson
 import           Data.Attoparsec.ByteString
 import           Data.Attoparsec.ByteString.Char8 (decimal)
 import           Data.ByteString (ByteString)
-import           Data.ByteString.Lazy (fromStrict)
 import           Conduit
 import           Network.HTTP.Simple
 import           Web.Hastodon.Util
@@ -34,9 +33,13 @@ pStreamHashtag     = "/api/v1/streaming/hashtag"
 pStreamList        = "/api/v1/streaming/list"
 
 type StreamingResponse m =
-  forall m. MonadResource m => ConduitT () (Maybe StreamingPayload) m ()
+  forall m. MonadResource m => ConduitT () ByteString m ()
 
-data StreamingPayload = SUpdate Status | SNotification Notification | SDelete Int | Thump
+data StreamingPayload = SUpdate Status             |
+                        SNotification Notification |
+                        SDelete Int                |
+                        Thump
+                        deriving (Show)
 
 
 streamUser :: HastodonClient -> StreamingResponse m
@@ -62,10 +65,10 @@ streamList client list = getStreamingResponse l client where
 ----
 
 decodeNotification :: ByteString -> Maybe StreamingPayload
-decodeNotification s = SNotification <$> (decode' $ fromStrict s)
+decodeNotification s = SNotification <$> (decodeStrict' s)
 
 decodeUpdate :: ByteString -> Maybe StreamingPayload
-decodeUpdate s = SUpdate <$> (decode' $ fromStrict s)
+decodeUpdate s = SUpdate <$> (decodeStrict' s)
 
 notification :: Parser (Maybe StreamingPayload)
 notification = string "event: notification\ndata: " >$< decodeNotification
@@ -88,7 +91,7 @@ parseStream = join . maybeResult . parse stream
 getStreamingResponse :: String -> HastodonClient -> StreamingResponse m
 getStreamingResponse path client = do
   req <- liftIO $ mkHastodonRequest path client
-  httpSource req getResponseBody .| mapC parseStream
+  httpSource req getResponseBody
 
 (>$<) :: (Functor f) => f a -> (a -> b) -> f b
 (>$<) = flip fmap

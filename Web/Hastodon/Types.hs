@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 module Web.Hastodon.Types
   ( HastodonId
   , OAuthResponse(..)
@@ -30,7 +31,7 @@ data OAuthResponse = OAuthResponse {
 } deriving (Show)
 instance FromJSON OAuthResponse where
   parseJSON (Object v) =
-    OAuthResponse <$> (v .: T.pack "access_token")
+    OAuthResponse <$> (v .: "access_token")
 
 data Account = Account {
   accountId :: HastodonId,
@@ -51,21 +52,21 @@ data Account = Account {
 } deriving (Show)
 instance FromJSON Account where
   parseJSON (Object v) =
-    Account <$> (v .: T.pack "id")
-            <*> (v .: T.pack "username")
-            <*> (v .: T.pack "acct")
-            <*> (v .: T.pack "display_name")
-            <*> (v .: T.pack "locked")
-            <*> (v .: T.pack "created_at")
-            <*> (v .: T.pack "followers_count")
-            <*> (v .: T.pack "following_count")
-            <*> (v .: T.pack "statuses_count")
-            <*> (v .: T.pack "note")
-            <*> (v .: T.pack "url")
-            <*> (v .: T.pack "avatar")
-            <*> (v .: T.pack "avatar_static")
-            <*> (v .: T.pack "header")
-            <*> (v .: T.pack "header_static")
+    Account <$> (v .: "id")
+            <*> (v .: "username")
+            <*> (v .: "acct")
+            <*> (v .: "display_name")
+            <*> (v .: "locked")
+            <*> (v .: "created_at")
+            <*> (v .: "followers_count")
+            <*> (v .: "following_count")
+            <*> (v .: "statuses_count")
+            <*> (v .: "note")
+            <*> (v .: "url")
+            <*> (v .: "avatar")
+            <*> (v .: "avatar_static")
+            <*> (v .: "header")
+            <*> (v .: "header_static")
 
 data Application = Application {
   applicationName :: String,
@@ -73,8 +74,8 @@ data Application = Application {
 } deriving (Show)
 instance FromJSON Application where
   parseJSON (Object v) =
-    Application <$> (v .:  T.pack "name")
-                <*> (v .:? T.pack "website")
+    Application <$> (v .:  "name")
+                <*> (v .:? "website")
 
 data Attachment = Attachment {
   attachmentId :: HastodonId,
@@ -86,12 +87,12 @@ data Attachment = Attachment {
 } deriving (Show)
 instance FromJSON Attachment where
   parseJSON (Object v) =
-    Attachment <$> (v .:  T.pack "id")
-               <*> (v .:  T.pack "type")
-               <*> (v .:  T.pack "url")
-               <*> (v .:? T.pack "remote_url")
-               <*> (v .:  T.pack "preview_url")
-               <*> (v .:? T.pack "text_url")
+    Attachment <$> (v .:  "id")
+               <*> (v .:  "type")
+               <*> (v .:  "url")
+               <*> (v .:? "remote_url")
+               <*> (v .:  "preview_url")
+               <*> (v .:? "text_url")
 
 data Card = Card {
   cardUrl :: String,
@@ -101,10 +102,10 @@ data Card = Card {
 } deriving (Show)
 instance FromJSON Card where
   parseJSON (Object v) =
-    Card <$> (v .: T.pack "url")
-         <*> (v .: T.pack "title")
-         <*> (v .: T.pack "description")
-         <*> (v .: T.pack "image")
+    Card <$> (v .: "url")
+         <*> (v .: "title")
+         <*> (v .: "description")
+         <*> (v .: "image")
 
 data Context = Context {
   contextAncestors :: [Status],
@@ -112,8 +113,8 @@ data Context = Context {
 } deriving (Show)
 instance FromJSON Context where
   parseJSON (Object v) =
-    Context <$> (v .: T.pack "ancestors")
-            <*> (v .: T.pack "descendants")
+    Context <$> (v .: "ancestors")
+            <*> (v .: "descendants")
 
 data Instance = Instance {
   instanceUri :: String,
@@ -123,10 +124,10 @@ data Instance = Instance {
 } deriving (Show)
 instance FromJSON Instance where
   parseJSON (Object v) =
-    Instance <$> (v .: T.pack "uri")
-             <*> (v .: T.pack "title")
-             <*> (v .: T.pack "description")
-             <*> (v .: T.pack "email")
+    Instance <$> (v .: "uri")
+             <*> (v .: "title")
+             <*> (v .: "description")
+             <*> (v .: "email")
 
 data Mention = Mention {
   mentionUrl :: String,
@@ -136,10 +137,10 @@ data Mention = Mention {
 } deriving (Show)
 instance FromJSON Mention where
   parseJSON (Object v) =
-    Mention <$> (v .: T.pack "url")
-            <*> (v .: T.pack "username")
-            <*> (v .: T.pack "acct")
-            <*> (v .: T.pack "id")
+    Mention <$> (v .: "url")
+            <*> (v .: "username")
+            <*> (v .: "acct")
+            <*> (v .: "id")
 
 data Notification = Notification {
   notificationId :: HastodonId,
@@ -150,11 +151,11 @@ data Notification = Notification {
 } deriving (Show)
 instance FromJSON Notification where
   parseJSON (Object v) =
-    Notification <$> (v .:  T.pack "id")
-                 <*> (v .:  T.pack "type")
-                 <*> (v .:  T.pack "created_at")
-                 <*> (v .:  T.pack "account")
-                 <*> (v .:? T.pack "status")
+    Notification <$> (v .:  "id")
+                 <*> (v .:  "type")
+                 <*> (v .:  "created_at")
+                 <*> (v .:  "account")
+                 <*> (v .:? "status")
 
 data OAuthClient = OAuthClient {
   oauthClientId :: HastodonId,
@@ -164,10 +165,10 @@ data OAuthClient = OAuthClient {
 } deriving (Show)
 instance FromJSON OAuthClient where
   parseJSON (Object v) =
-    OAuthClient <$> (v .: T.pack "id")
-                <*> (v .: T.pack "redirect_uri")
-                <*> (v .: T.pack "client_id")
-                <*> (v .: T.pack "client_secret")
+    OAuthClient <$> (v .: "id")
+                <*> (v .: "redirect_uri")
+                <*> (v .: "client_id")
+                <*> (v .: "client_secret")
 
 data Relationship = Relationship {
   relationshipId :: HastodonId,
@@ -179,12 +180,12 @@ data Relationship = Relationship {
 } deriving (Show)
 instance FromJSON Relationship where
   parseJSON (Object v) =
-    Relationship <$> (v .: T.pack "id")
-                 <*> (v .: T.pack "following")
-                 <*> (v .: T.pack "followed_by")
-                 <*> (v .: T.pack "blocking")
-                 <*> (v .: T.pack "muting")
-                 <*> (v .: T.pack "requested")
+    Relationship <$> (v .: "id")
+                 <*> (v .: "following")
+                 <*> (v .: "followed_by")
+                 <*> (v .: "blocking")
+                 <*> (v .: "muting")
+                 <*> (v .: "requested")
 
 data Report = Report {
   reportId :: HastodonId,
@@ -192,8 +193,8 @@ data Report = Report {
 } deriving (Show)
 instance FromJSON Report where
   parseJSON (Object v) =
-    Report <$> (v .: T.pack "id")
-           <*> (v .: T.pack "action_taken")
+    Report <$> (v .: "id")
+           <*> (v .: "action_taken")
 
 data Results = Results {
   resultAccounts :: [Account],
@@ -202,9 +203,20 @@ data Results = Results {
 } deriving (Show)
 instance FromJSON Results where
   parseJSON (Object v) =
-    Results <$> (v .: T.pack "accounts")
-            <*> (v .: T.pack "statuses")
-            <*> (v .: T.pack "hashtags")
+    Results <$> (v .: "accounts")
+            <*> (v .: "statuses")
+            <*> (v .: "hashtags")
+
+data Emoji = Emoji {
+  emojiShortcode :: String,
+  emojiStaticUrl :: String,
+  emojiUrl :: String
+} deriving (Show)
+instance FromJSON Emoji where
+ parseJSON (Object v) =
+   Emoji <$> (v .: "shortcode")
+         <*> (v .: "static_url")
+         <*> (v .: "url")
 
 data Status = Status {
   statusId :: HastodonId,
@@ -220,36 +232,42 @@ data Status = Status {
   statusFavouritesCount :: Int,
   statusReblogged :: Maybe Bool,
   statusFavourited :: Maybe Bool,
+  statusMuted :: Bool,
   statusSensitive :: Maybe Bool,
   statusSpoilerText :: String,
   statusVisibility :: String,
   statusMediaAttachments :: [Attachment],
   statusMentions :: [Mention],
   statusTags :: [Tag],
-  statusApplication :: Maybe Application
+  statusApplication :: Maybe Application,
+  statusEmojis :: [Emoji],
+  statusLanguage :: String
 } deriving (Show)
 instance FromJSON Status where
   parseJSON (Object v) =
-    Status <$> (v .:  T.pack "id")
-           <*> (v .:  T.pack "uri")
-           <*> (maybe "" id <$> (v .:?  T.pack "url"))
-           <*> (v .:  T.pack "account")
-           <*> (v .:? T.pack "in_reply_to_id")
-           <*> (v .:? T.pack "in_reply_to_account_id")
-           <*> (v .:? T.pack "reblog")
-           <*> (v .:  T.pack "content")
-           <*> (v .:  T.pack "created_at")
-           <*> (v .:  T.pack "reblogs_count")
-           <*> (v .:  T.pack "favourites_count")
-           <*> (v .:? T.pack "reblogged")
-           <*> (v .:? T.pack "favourited")
-           <*> (v .:? T.pack "sensitive")
-           <*> (v .:  T.pack "spoiler_text")
-           <*> (v .:  T.pack "visibility")
-           <*> (v .:  T.pack "media_attachments")
-           <*> (v .:  T.pack "mentions")
-           <*> (v .:  T.pack "tags")
-           <*> (v .:? T.pack "application")
+    Status <$> (v .:  "id")
+           <*> (v .:  "uri")
+           <*> (v .:  "url")
+           <*> (v .:  "account")
+           <*> (v .:? "in_reply_to_id")
+           <*> (v .:? "in_reply_to_account_id")
+           <*> (v .:? "reblog")
+           <*> (v .:  "content")
+           <*> (v .:  "created_at")
+           <*> (v .:  "reblogs_count")
+           <*> (v .:  "favourites_count")
+           <*> (v .:? "reblogged")
+           <*> (v .:? "favourited")
+           <*> (v .: "muted")
+           <*> (v .:? "sensitive")
+           <*> (v .:  "spoiler_text")
+           <*> (v .:  "visibility")
+           <*> (v .:  "media_attachments")
+           <*> (v .:  "mentions")
+           <*> (v .:  "tags")
+           <*> (v .:? "application")
+           <*> (v .: "emojis")
+           <*> (v .: "language")
 
 data Tag = Tag {
   name :: String,
@@ -257,5 +275,5 @@ data Tag = Tag {
 } deriving (Show)
 instance FromJSON Tag where
   parseJSON (Object v) =
-    Tag <$> (v .: T.pack "name")
-        <*> (v .: T.pack "url")
+    Tag <$> (v .: "name")
+        <*> (v .: "url")

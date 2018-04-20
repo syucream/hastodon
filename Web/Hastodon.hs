@@ -13,6 +13,8 @@ module Web.Hastodon
   , Report(..)
   , Results(..)
   , Status(..)
+  , StreamingPayload(..)
+  , StreamingResponse
   , Tag(..)
 
   , mkHastodonClient
