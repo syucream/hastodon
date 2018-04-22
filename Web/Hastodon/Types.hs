@@ -232,7 +232,7 @@ data Status = Status {
   statusFavouritesCount :: Int,
   statusReblogged :: Maybe Bool,
   statusFavourited :: Maybe Bool,
-  statusMuted :: Bool,
+  statusMuted :: Maybe Bool,
   statusSensitive :: Maybe Bool,
   statusSpoilerText :: String,
   statusVisibility :: String,
@@ -241,7 +241,7 @@ data Status = Status {
   statusTags :: [Tag],
   statusApplication :: Maybe Application,
   statusEmojis :: [Emoji],
-  statusLanguage :: String
+  statusLanguage :: Maybe String
 } deriving (Show)
 instance FromJSON Status where
   parseJSON (Object v) =
@@ -258,7 +258,7 @@ instance FromJSON Status where
            <*> (v .:  "favourites_count")
            <*> (v .:? "reblogged")
            <*> (v .:? "favourited")
-           <*> (v .: "muted")
+           <*> (v .:? "muted")
            <*> (v .:? "sensitive")
            <*> (v .:  "spoiler_text")
            <*> (v .:  "visibility")
@@ -267,7 +267,7 @@ instance FromJSON Status where
            <*> (v .:  "tags")
            <*> (v .:? "application")
            <*> (v .: "emojis")
-           <*> (v .: "language")
+           <*> (v .:? "language")
 
 data Tag = Tag {
   name :: String,

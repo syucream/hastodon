@@ -40,6 +40,23 @@ main = do
       putStrLn "Failed to log in.  Be careful regarding the spelling of your email and password."
 ```
 
+### Streaming
+Streaming requires a little more ceremony, as well as familiarity with the [`Conduit`](https://hackage.haskell.org/package/conduit-1.3.0.2) library.
+
+```haskell
+import Web.Hastodon
+import Conduit
+import qualfied Data.ByteString.Char8 as BS
+
+main :: IO ()
+main = do
+  let instance = "mastodon.social"
+  let token = "???" -- from /settings/applications
+  client = HastodonClient instance token -- or use mkHastodonClient as above
+  runConduitRes $ streamUser client .| mapC showBS .| stdoutC
+ where showBS x = BS.snoc (BS.pack $ show x) '\n'
+```
+
 ## Status of implementations
 
 ### Mastodon APIs

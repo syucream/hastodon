@@ -11,15 +11,19 @@ module Web.Hastodon.Streaming
   , streamList
   ) where
 
-import           Control.Monad (join)
+import           Prelude hiding (takeWhile)
+import           Control.Applicative ((<|>), many, some)
 import           Data.Aeson
-import           Data.Attoparsec.ByteString
-import           Data.Attoparsec.ByteString.Char8 (decimal)
+import           Data.Attoparsec.ByteString as A
+import           Data.Attoparsec.ByteString.Char8 as C8
+import qualified Data.ByteString as BS
 import           Data.ByteString (ByteString)
+import qualified Data.ByteString.Char8 as B8
+import           Data.Maybe (maybeToList)
 import           Conduit
 import           Network.HTTP.Simple
 import           Web.Hastodon.Util
-import           Web.Hastodon.Types (Notification, Status)
+import           Web.Hastodon.Types
 
 
 ----
@@ -33,13 +37,15 @@ pStreamHashtag     = "/api/v1/streaming/hashtag"
 pStreamList        = "/api/v1/streaming/list"
 
 type StreamingResponse m =
-  forall m. MonadResource m => ConduitT () ByteString m ()
+  forall m. MonadResource m => ConduitT () StreamingPayload m ()
 
 data StreamingPayload = SUpdate Status             |
                         SNotification Notification |
-                        SDelete Int                |
+                        SDelete HastodonId         |
                         Thump
                         deriving (Show)
+
+data EventType = EUpdate | ENotification | EDelete
 
 
 streamUser :: HastodonClient -> StreamingResponse m
@@ -64,34 +70,61 @@ streamList client list = getStreamingResponse l client where
 -- Private stuff
 ----
 
-decodeNotification :: ByteString -> Maybe StreamingPayload
-decodeNotification s = SNotification <$> (decodeStrict' s)
+stream :: ByteString -> ByteString -> (ByteString, [StreamingPayload])
+stream i a | isThump i = ("", [Thump])
+           | isEvent i = (i, [])
+           | otherwise = parseE a i
+  where parseE et d =
+          case parseET et of
+            (Just EDelete) -> ("", p parseDelete d)
+            (Just ENotification) -> ("", p parseNotification d)
+            (Just EUpdate) -> ("",p parseUpdate d)
+            Nothing -> ("", [])
+        p r s = maybeToList $ maybeResult $ parse r s
+        isThump = (":thump" `B8.isPrefixOf`)
+        isEvent = ("event: " `B8.isPrefixOf`)
+        parseET s = maybeResult $ parse parseEvent s
 
-decodeUpdate :: ByteString -> Maybe StreamingPayload
-decodeUpdate s = SUpdate <$> (decodeStrict' s)
+parseEvent :: Parser EventType
+parseEvent = do
+  string "event: "
+  try ("delete" *> return EDelete)   <|>
+    try ("update" *> return EUpdate) <|>
+    try ("notification" *> return ENotification)
 
-notification :: Parser (Maybe StreamingPayload)
-notification = string "event: notification\ndata: " >$< decodeNotification
+pd = string "data: "
 
-update :: Parser (Maybe StreamingPayload)
-update = string "event: update\ndata: " >$< decodeUpdate
+parseDelete :: Parser StreamingPayload
+parseDelete = do
+  pd
+  i <- many C8.digit
+  return $ SDelete i
 
-thump :: Parser (Maybe StreamingPayload)
-thump = ":thump\n" *> return (Just Thump)
 
-delete :: Parser (Maybe StreamingPayload)
-delete = "event: delete\ndata: " *> decimal >$< (Just . SDelete)
+eoc :: String -> Char -> Maybe String
+eoc "\n" '\n' = Nothing
+eoc acc c = Just (c:acc)
 
-stream :: Parser (Maybe StreamingPayload)
-stream = choice [thump, notification, update, delete]
+parseNotification :: Parser StreamingPayload
+parseNotification = do
+  pd
+  s <- C8.takeTill (== '\n')
+  case (decodeStrict' s :: Maybe Notification) of
+    Nothing -> fail $ "decode error"
+    (Just n) -> return $ SNotification n
 
-parseStream :: ByteString -> Maybe StreamingPayload
-parseStream = join . maybeResult . parse stream
+parseUpdate :: Parser StreamingPayload
+parseUpdate = do
+  pd
+  s <- C8.takeTill (== '\n')
+  case (decodeStrict' s :: Maybe Status) of
+    Nothing -> fail $ "decode error"
+    (Just s) -> return $ SUpdate s
 
-getStreamingResponse :: String -> HastodonClient -> StreamingResponse m
+parseStream :: forall m. MonadResource m =>
+  ConduitT ByteString StreamingPayload m ()
+parseStream = concatMapAccumC stream ""
+
 getStreamingResponse path client = do
   req <- liftIO $ mkHastodonRequest path client
-  httpSource req getResponseBody
-
-(>$<) :: (Functor f) => f a -> (a -> b) -> f b
-(>$<) = flip fmap
+  httpSource req getResponseBody .| parseStream
