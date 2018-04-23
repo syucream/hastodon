@@ -23,7 +23,7 @@ Library
                  aeson,
                  attoparsec,
                  bytestring,
-                 conduit,
+                 conduit >= 1.3.0,
                  exceptions,
                  mime-types,
                  http-types,
