@@ -1,6 +1,6 @@
 dist: trusty
 before_install:
   - travis_retry sudo apt-get update
-  - travis_retry sudo apt-get install -y stack
+  - travis_retry sudo curl -sSL https://get.haskellstack.org/ | sh
 script:
   - stack build
