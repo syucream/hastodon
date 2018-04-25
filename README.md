@@ -7,7 +7,7 @@ mastodon client module for Haskell
 
 ## Quickstart
 
-If you don't have client id and client secret, call postApps at first. (Alternatively, in the web client, under the development section of your mastodon profile settings, 
+If you don't have client id and client secret, call postApps at first. (Alternatively, look in the web client, under the development section of your mastodon profile settings)
 
 ```haskell
 import Web.Hastodon
@@ -38,6 +38,28 @@ main = do
       print result
     Nothing -> do
       putStrLn "Failed to log in.  Be careful regarding the spelling of your email and password."
+```
+
+### Streaming
+Streaming requires a little more ceremony, as well as familiarity with the [`Conduit`](https://hackage.haskell.org/package/conduit-1.3.0.2) library.
+
+```haskell
+{-# LANGUAGE OverloadedStrings #-}
+import Web.Hastodon
+import Conduit
+import qualified Data.ByteString.Char8 as BS
+
+main :: IO ()
+main = do
+  let inst = "mastodon.social"
+  let token = "???" -- from /settings/applications
+  let client = HastodonClient instance token -- or use mkHastodonClient as above
+  runConduitRes $ streamUser client .| mapC showSR .| stdoutC
+ where showSR (SNotification n) = "got notification: " `BS.append` (sb n) `BS.append` "\n"
+       showSR (SUpdate s) = "got status: " `BS.append` (sb s) `BS.append` "\n"
+       showSR (SDelete i) = "got delete: " `BS.append` (BS.pack i) `BS.append` "\n"
+       showSR Thump = "got thump\n"
+       sb v = BS.pack $ show v
 ```
 
 ## Status of implementations
@@ -88,6 +110,15 @@ main = do
 - [x]  GET /api/v1/timelines/home
 - [x]  GET /api/v1/timelines/public
 - [x]  GET /api/v1/timelines/tag/:hashtag
+
+### Streaming
+
+- [x]  GET /api/v1/streaming/user
+- [x]  GET /api/v1/streaming/public
+- [x]  GET /api/v1/streaming/public/local
+- [x]  GET /api/v1/streaming/hashtag
+- [x]  GET /api/v1/streaming/list
+
 
 ### Auth
 
