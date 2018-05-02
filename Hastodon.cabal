@@ -35,4 +35,8 @@ Library
                  transformers
 
   Exposed-Modules: Web.Hastodon
-  Other-Modules:
+  Other-Modules: Web.Hastodon.API,
+                 Web.Hastodon.Streaming,
+                 Web.Hastodon.Types,
+                 Web.Hastodon.Util
+
