@@ -32,9 +32,12 @@ Library
                  MissingH,
                  resourcet,
                  text,
-                 transformers
+                 transformers,
+                 containers
 
-  Exposed-Modules: Web.Hastodon
+  Exposed-Modules: Web.Hastodon,
+                   Web.Hastodon.Option
+
   Other-Modules: Web.Hastodon.API,
                  Web.Hastodon.Streaming,
                  Web.Hastodon.Types,
