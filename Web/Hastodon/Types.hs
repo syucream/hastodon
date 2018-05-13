@@ -16,12 +16,16 @@ module Web.Hastodon.Types
   , Results(..)
   , Status(..)
   , Tag(..)
+  , OptionVal
+  , OptionImpl
+  , IsOption(..)
   ) where
 
 import Data.Aeson
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
-
+import qualified Data.ByteString.Char8 as Char8
+import qualified Data.Map as Map
 
 type HastodonId = String
 
@@ -277,3 +281,13 @@ instance FromJSON Tag where
   parseJSON (Object v) =
     Tag <$> (v .: "name")
         <*> (v .: "url")
+
+-- Left : Array parameter, Right : Single parameter
+type OptionVal = Either [Char8.ByteString] (Maybe Char8.ByteString)
+
+type OptionImpl = Map.Map Char8.ByteString OptionVal
+
+class IsOption a where
+  fromOptionImpl :: OptionImpl -> a
+  toOptionImpl :: a -> OptionImpl
+

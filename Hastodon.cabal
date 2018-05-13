@@ -1,5 +1,5 @@
 Name: Hastodon
-Version: 0.4.1
+Version: 0.5.0
 Synopsis: mastodon client module for Haskell
 Category: Web
 Description: mastodon client module for Haskell
@@ -32,9 +32,12 @@ Library
                  MissingH,
                  resourcet,
                  text,
-                 transformers
+                 transformers,
+                 containers
 
-  Exposed-Modules: Web.Hastodon
+  Exposed-Modules: Web.Hastodon,
+                   Web.Hastodon.Option
+
   Other-Modules: Web.Hastodon.API,
                  Web.Hastodon.Streaming,
                  Web.Hastodon.Types,
