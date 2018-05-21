@@ -280,11 +280,11 @@ formatVis VisibilityPrivate = "private"
 formatVis VisibilityUnlisted = "unlisted"
 formatVis VisibilityPublic = "public"
 
-inReplyToId :: IsPostStatusOption a => Int -> a
-inReplyToId i = mkOption "in_reply_to_id" (Just $ show i)
+inReplyToId :: IsPostStatusOption a => HastodonId -> a
+inReplyToId i = mkOption "in_reply_to_id" $ Just i
 
-mediaIds :: IsPostStatusOption a => [Int] -> a
-mediaIds l = mkArrayOption "media_ids" $ show <$> l
+mediaIds :: IsPostStatusOption a => [HastodonId] -> a
+mediaIds l = mkArrayOption "media_ids" l
 
 sensitive :: IsPostStatusOption a => a
 sensitive = mkOption "sensitive" Nothing
