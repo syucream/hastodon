@@ -97,11 +97,11 @@ class IsOption a => IsRangeOption a where {}
 instance IsLimitOption RangeOption where {}
 instance IsRangeOption RangeOption where {}
 
-sinceId :: IsRangeOption a => String -> a
-sinceId i = mkOption "since_id" $ Just i
+sinceId :: IsRangeOption a => StatusId -> a
+sinceId i = mkOption "since_id" $ Just $ show i
 
-maxId :: IsRangeOption a => String -> a
-maxId i = mkOption "max_id" $ Just i
+maxId :: IsRangeOption a => StatusId -> a
+maxId i = mkOption "max_id" $ Just $ show i
 
 --
 -- Timeline options
@@ -280,10 +280,10 @@ formatVis VisibilityPrivate = "private"
 formatVis VisibilityUnlisted = "unlisted"
 formatVis VisibilityPublic = "public"
 
-inReplyToId :: IsPostStatusOption a => Int -> a
+inReplyToId :: IsPostStatusOption a => AccountId -> a
 inReplyToId i = mkOption "in_reply_to_id" (Just $ show i)
 
-mediaIds :: IsPostStatusOption a => [Int] -> a
+mediaIds :: IsPostStatusOption a => [MediaId] -> a
 mediaIds l = mkArrayOption "media_ids" $ show <$> l
 
 sensitive :: IsPostStatusOption a => a
@@ -318,6 +318,3 @@ instance IsPostMuteOption PostMuteOption where {}
 
 muteNotifications :: IsPostMuteOption a => a
 muteNotifications = mkOption "notifications" $ Nothing
-
-
-
