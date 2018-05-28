@@ -41,7 +41,7 @@ type StreamingResponse m =
 
 data StreamingPayload = SUpdate Status             |
                         SNotification Notification |
-                        SDelete HastodonId         |
+                        SDelete StatusId           |
                         Thump
                         deriving (Show)
 
@@ -97,7 +97,7 @@ pd = string "data: "
 parseDelete :: Parser StreamingPayload
 parseDelete = do
   pd
-  i <- many C8.digit
+  i <- StatusId <$> many C8.digit
   return $ SDelete i
 
 

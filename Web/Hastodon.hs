@@ -1,24 +1,8 @@
 module Web.Hastodon
   ( module Web.Hastodon.Option
-
+  , module Web.Hastodon.Streaming
+  , module Web.Hastodon.Types
   , HastodonClient(..)
-  , Account(..)
-  , Application(..)
-  , Attachment(..)
-  , Card(..)
-  , Context(..)
-  , Instance(..)
-  , Mention(..)
-  , Notification(..)
-  , OAuthClient(..)
-  , Relationship(..)
-  , Report(..)
-  , Results(..)
-  , Status(..)
-  , StreamingPayload(..)
-  , StreamingResponse
-  , Tag(..)
-
   , mkHastodonClient
   , getAccountById
   , getCurrentAccount

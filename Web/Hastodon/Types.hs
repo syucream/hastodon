@@ -1,20 +1,28 @@
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedStrings #-}
 module Web.Hastodon.Types
-  ( HastodonId
-  , OAuthResponse(..)
+  ( OAuthResponse(..)
   , Account(..)
+  , AccountId(..)
   , Application(..)
   , Attachment(..)
+  , AttachmentId(..)
   , Card(..)
   , Context(..)
   , Instance(..)
+  , MediaId(..)
   , Mention(..)
   , Notification(..)
+  , NotificationId(..)
   , OAuthClient(..)
+  , OAuthClientId(..)
   , Relationship(..)
+  , RelationshipId(..)
   , Report(..)
+  , ReportId(..)
   , Results(..)
   , Status(..)
+  , StatusId(..)
   , Tag(..)
   , OptionVal
   , OptionImpl
@@ -22,12 +30,28 @@ module Web.Hastodon.Types
   ) where
 
 import Data.Aeson
+import Data.String (IsString, fromString)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 import qualified Data.ByteString.Char8 as Char8
 import qualified Data.Map as Map
 
-type HastodonId = String
+newtype AccountId = AccountId { unAccountId :: String } deriving (FromJSON, IsString, Show)
+
+newtype AttachmentId = AttachmentId { unAttachmentId :: String } deriving (FromJSON, IsString, Show)
+
+newtype OAuthClientId = OAuthClientId { unOAuthClientId :: String } deriving (FromJSON, IsString, Show)
+
+newtype MediaId = MediaId { unMediaId :: String } deriving (FromJSON, IsString, Show)
+
+newtype NotificationId = NotificationId { unNotificationId :: String } deriving (FromJSON, IsString, Show)
+
+newtype RelationshipId = RelationshipId { unRelationshipId :: String } deriving (FromJSON, IsString, Show)
+
+newtype ReportId = ReportId { unReportId :: String } deriving (FromJSON, IsString, Show)
+
+newtype StatusId = StatusId { unStatusId :: String } deriving (FromJSON, IsString, Show)
+
 
 data OAuthResponse = OAuthResponse {
   accessToken :: String
@@ -38,7 +62,7 @@ instance FromJSON OAuthResponse where
     OAuthResponse <$> (v .: "access_token")
 
 data Account = Account {
-  accountId :: HastodonId,
+  accountId :: AccountId,
   accountUsername :: String,
   accountAcct :: String,
   accountDisplayName :: String,
@@ -82,7 +106,7 @@ instance FromJSON Application where
                 <*> (v .:? "website")
 
 data Attachment = Attachment {
-  attachmentId :: HastodonId,
+  attachmentId :: AttachmentId,
   attachmentType :: String,
   attachmentUrl :: String,
   attachmentRemoteUrl :: Maybe String,
@@ -137,7 +161,7 @@ data Mention = Mention {
   mentionUrl :: String,
   mentionUsername :: String,
   mentionAcct :: String,
-  mentionId :: HastodonId
+  mentionId :: AccountId
 } deriving (Show)
 instance FromJSON Mention where
   parseJSON (Object v) =
@@ -147,7 +171,7 @@ instance FromJSON Mention where
             <*> (v .: "id")
 
 data Notification = Notification {
-  notificationId :: HastodonId,
+  notificationId :: NotificationId,
   notificationType :: String,
   notificationCreatedAt :: String,
   notificationAccount :: Account,
@@ -162,7 +186,7 @@ instance FromJSON Notification where
                  <*> (v .:? "status")
 
 data OAuthClient = OAuthClient {
-  oauthClientId :: HastodonId,
+  oauthClientId :: OAuthClientId,
   oauthClientRedirectUri :: String,
   oauthClientClientId :: String,
   oauthClientClientSecret :: String
@@ -175,7 +199,7 @@ instance FromJSON OAuthClient where
                 <*> (v .: "client_secret")
 
 data Relationship = Relationship {
-  relationshipId :: HastodonId,
+  relationshipId :: RelationshipId,
   relationshipFollowing :: Bool,
   relationshipFollowed_by :: Bool,
   relationshipBlocking :: Bool,
@@ -192,7 +216,7 @@ instance FromJSON Relationship where
                  <*> (v .: "requested")
 
 data Report = Report {
-  reportId :: HastodonId,
+  reportId :: ReportId,
   reportActionToken :: String
 } deriving (Show)
 instance FromJSON Report where
@@ -223,7 +247,7 @@ instance FromJSON Emoji where
          <*> (v .: "url")
 
 data Status = Status {
-  statusId :: HastodonId,
+  statusId :: StatusId,
   statusUri :: String,
   statusUrl :: String,
   statusAccount :: Account,
