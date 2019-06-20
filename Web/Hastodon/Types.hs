@@ -36,21 +36,25 @@ import qualified Data.Text.Encoding as T
 import qualified Data.ByteString.Char8 as Char8
 import qualified Data.Map as Map
 
-newtype AccountId = AccountId { unAccountId :: String } deriving (FromJSON, IsString, Show)
+newtype AccountId = AccountId { unAccountId :: String } deriving (FromJSON, IsString, Show, Eq)
 
-newtype AttachmentId = AttachmentId { unAttachmentId :: String } deriving (FromJSON, IsString, Show)
+newtype AttachmentId = AttachmentId { unAttachmentId :: String } deriving (FromJSON, IsString, Show, Eq)
 
-newtype OAuthClientId = OAuthClientId { unOAuthClientId :: String } deriving (FromJSON, IsString, Show)
+newtype OAuthClientId = OAuthClientId { unOAuthClientId :: String } deriving (FromJSON, IsString, Show, Eq)
 
-newtype MediaId = MediaId { unMediaId :: String } deriving (FromJSON, IsString, Show)
+newtype MediaId = MediaId { unMediaId :: String } deriving (FromJSON, IsString, Show, Eq)
 
-newtype NotificationId = NotificationId { unNotificationId :: String } deriving (FromJSON, IsString, Show)
+newtype NotificationId = NotificationId { unNotificationId :: String } deriving (FromJSON, IsString, Show, Eq)
 
-newtype RelationshipId = RelationshipId { unRelationshipId :: String } deriving (FromJSON, IsString, Show)
+newtype RelationshipId = RelationshipId { unRelationshipId :: String } deriving (FromJSON, IsString, Show, Eq)
 
-newtype ReportId = ReportId { unReportId :: String } deriving (FromJSON, IsString, Show)
+newtype ReportId = ReportId { unReportId :: String } deriving (FromJSON, IsString, Show, Eq)
 
-newtype StatusId = StatusId { unStatusId :: String } deriving (FromJSON, IsString, Show)
+newtype StatusId = StatusId { unStatusId :: String } deriving (FromJSON, IsString, Eq)
+
+
+instance Show StatusId where
+  show = unStatusId
 
 
 data OAuthResponse = OAuthResponse {
@@ -251,8 +255,8 @@ data Status = Status {
   statusUri :: String,
   statusUrl :: String,
   statusAccount :: Account,
-  statusInReplyToId :: Maybe Int,
-  statusInReplyToAccountId :: Maybe Int,
+  statusInReplyToId :: Maybe String,
+  statusInReplyToAccountId :: Maybe String,
   statusReblog :: Maybe Status,
   statusContent :: String,
   statusCreatedAt :: String,
