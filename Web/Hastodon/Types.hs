@@ -36,26 +36,34 @@ import qualified Data.Text.Encoding as T
 import qualified Data.ByteString.Char8 as Char8
 import qualified Data.Map as Map
 
-newtype AccountId = AccountId { unAccountId :: String } deriving (FromJSON, IsString, Show, Eq)
+newtype AccountId = AccountId { unAccountId :: String } deriving (FromJSON, IsString, Eq, Ord)
 
-newtype AttachmentId = AttachmentId { unAttachmentId :: String } deriving (FromJSON, IsString, Show, Eq)
+newtype AttachmentId = AttachmentId { unAttachmentId :: String } deriving (FromJSON, IsString, Show, Eq, Ord)
 
-newtype OAuthClientId = OAuthClientId { unOAuthClientId :: String } deriving (FromJSON, IsString, Show, Eq)
+newtype OAuthClientId = OAuthClientId { unOAuthClientId :: String } deriving (FromJSON, IsString, Show, Eq, Ord)
 
-newtype MediaId = MediaId { unMediaId :: String } deriving (FromJSON, IsString, Show, Eq)
+newtype MediaId = MediaId { unMediaId :: String } deriving (FromJSON, IsString, Show, Eq, Ord)
 
-newtype NotificationId = NotificationId { unNotificationId :: String } deriving (FromJSON, IsString, Show, Eq)
+newtype NotificationId = NotificationId { unNotificationId :: String } deriving (FromJSON, IsString, Eq, Ord)
 
-newtype RelationshipId = RelationshipId { unRelationshipId :: String } deriving (FromJSON, IsString, Show, Eq)
+newtype RelationshipId = RelationshipId { unRelationshipId :: String } deriving (FromJSON, IsString, Show, Eq, Ord)
 
-newtype ReportId = ReportId { unReportId :: String } deriving (FromJSON, IsString, Show, Eq)
+newtype ReportId = ReportId { unReportId :: String } deriving (FromJSON, IsString, Show, Eq, Ord)
 
-newtype StatusId = StatusId { unStatusId :: String } deriving (FromJSON, IsString, Eq)
+newtype StatusId = StatusId { unStatusId :: String } deriving (FromJSON, IsString, Eq, Ord)
 
 
+-- This is a very suboptimal soluion for argument genration
+-- but is a temporary patch on a better solution.
 instance Show StatusId where
   show = unStatusId
 
+instance Show NotificationId where
+  show = unNotificationId
+
+instance Show AccountId where
+  show = unAccountId
+  
 
 data OAuthResponse = OAuthResponse {
   accessToken :: String

@@ -38,7 +38,7 @@ module Web.Hastodon.Option
     -- * Notification getting options
   , GetNotificationsOption ()
   , IsGetNotificationsOption
-  , NotificationType
+  , NotificationType (..)
   , excludeTypes
 
     -- * Status posting options
@@ -280,12 +280,8 @@ formatVis VisibilityPrivate = "private"
 formatVis VisibilityUnlisted = "unlisted"
 formatVis VisibilityPublic = "public"
 
-inReplyToAccountId :: IsPostStatusOption a => AccountId -> a
-inReplyToAccountId i = mkOption "in_reply_to_account_id" (Just $ show i)
-
 inReplyToId :: IsPostStatusOption a => StatusId -> a
 inReplyToId i = mkOption "in_reply_to_id" (Just $ show i)
-
 
 mediaIds :: IsPostStatusOption a => [MediaId] -> a
 mediaIds l = mkArrayOption "media_ids" $ show <$> l
